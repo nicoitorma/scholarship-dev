@@ -10,10 +10,12 @@ def get_user_role():
 
 @views.route('/')
 def index():
-    user_role = get_user_role()
-    if user_role == 'student':
-        print(user_role)
-        return render_template('student/index.html', user_role=user_role)
-    elif user_role == 'admin':
-        return render_template('admin/index.html')
-    # return render_template('base.html')
+    if 'email' in session:
+        email = session['email']
+        user_role = get_user_role()
+        if user_role == 'student':
+            print(user_role)
+            return render_template('student/index.html', user_role=user_role)
+        elif user_role == 'admin':
+            return render_template('admin/index.html')
+    return redirect(url_for('auth.login'))

@@ -11306,21 +11306,24 @@ a:focus {
 }
 
 .bg-login-image {
-  background: url("https://source.unsplash.com/K4mSJ7kc0As/600x800");
+  background: url("https://akobicolpartylist.files.wordpress.com/2021/04/cropped-cropped-akb-logo-circle.png?w=1000&h=992");
   background-position: center;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .bg-register-image {
-  background: url("https://source.unsplash.com/Mv9hjnEUHR4/600x800");
+  background: url("https://akobicolpartylist.files.wordpress.com/2021/04/cropped-cropped-akb-logo-circle.png?w=1000&h=992");
   background-position: center;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 .bg-password-image {
-  background: url("https://source.unsplash.com/oWTW-jNGl9I/600x800");
+  background: url("https://akobicolpartylist.files.wordpress.com/2021/04/cropped-cropped-akb-logo-circle.png?w=1000&h=992");
   background-position: center;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
 form.user .custom-checkbox.small label {

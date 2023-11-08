@@ -2,15 +2,15 @@ from flask import Blueprint, render_template, url_for, redirect, request, sessio
 import pyrebase
 
 firebaseConfig = {
-    'apiKey': 'AIzaSyB-x4jXcDvyug5Z4c5Zosjum24UavUKWeQ',
-    'authDomain': 'qr-attendance-32c1b.firebaseapp.com',
-    'databaseURL': 'https://qr-attendance-32c1b-default-rtdb.asia-southeast1.firebasedatabase.app',
-    'projectId': 'qr-attendance-32c1b',
-    'storageBucket': 'qr-attendance-32c1b.appspot.com',
-    'messagingSenderId': '870415657488',
-    'appId': '1:870415657488:web:0cfc89d7b6d6e5a09c7895',
-    'measurementId': 'G-Z7Z6MPVR9S'
+    'apiKey': "AIzaSyDfDh0fBA4OmCDWreHKHPA2DamVlS7jqyw",
+    'authDomain': "ako-bicol-a5403.firebaseapp.com",
+    'projectId': "ako-bicol-a5403",
+    'storageBucket': "ako-bicol-a5403.appspot.com",
+    'messagingSenderId': "126824501150",
+    'appId': "1:126824501150:web:7130b88bc6e141ff3fd08f",
+    "databaseURL": ""
 }
+
 cred = pyrebase.initialize_app(firebaseConfig)
 firebase = cred.auth()
 
@@ -29,13 +29,28 @@ def login():
             if user:
                 session['email'] = email
                 session['username'] = user['displayName']
-                session['dp'] = user['profilePicture']
 
-                return redirect(url_for('views.dashboard'))
+                return redirect(url_for('views.index'))
         except:
             error = 'Invalid email or password.'
             return render_template('login.html', error=error)
     else:
         if 'email' in session:
-            return redirect(url_for('views.dashboard'))
+            return redirect(url_for('views.index'))
         return render_template('login.html')
+
+
+@auth.route('/register', methods=['POST', 'GET'])
+def register():
+    return render_template('register.html')
+
+
+@auth.route('/logout', methods=['POST'])
+def logout():
+    session.pop('email', None)
+    return redirect(url_for('auth.login'))
+
+
+@auth.route('/forgot-password')
+def forgot_pass():
+    return render_template('forgot-password.html')
