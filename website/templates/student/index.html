@@ -17,7 +17,7 @@ content%}
       </button>
 
       <!-- Topbar Name -->
-      <h2 class="text-dark">Poncius Pilate</h2>
+      <h2 class="text-dark">{{name}}</h2>
 
       <!-- Topbar Navbar -->
       <ul class="navbar-nav ml-auto">
@@ -86,6 +86,12 @@ content%}
     </nav>
     <!-- End of Topbar -->
 
+    {% if scholarship=='none' %}
+    <div class="container-fluid">
+      {% include 'student/no_scholarship.html'%}
+    </div>
+    {%else%}
+
     <!-- Begin Page Content -->
     <div class="container-fluid">
       <!-- Page Heading -->
@@ -110,14 +116,14 @@ content%}
                   <div
                     class="text-xs font-weight-bold text-primary text-uppercase mb-1"
                   >
-                    Scholarship Allocation(Semester)
+                    Scholarship Type
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    40,000
+                    {{scholarship}}
                   </div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                  <i class="fas fa-folder-open fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -126,21 +132,21 @@ content%}
 
         <!-- Scholarship Allocation (Annual) Card -->
         <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border-left-success shadow h-100 py-2">
+          <div class="card border-left-dark shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div
                     class="text-xs font-weight-bold text-success text-uppercase mb-1"
                   >
-                    Scholarship Allocation (Annual)
+                    Allocation (Semester)
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    215,000
+                    10,000
                   </div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                  <i class="fas fa-money-bill fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -176,19 +182,21 @@ content%}
 
         <!-- Pending Requests Card Example -->
         <div class="col-xl-3 col-md-6 mb-4">
-          <div class="card border-left-warning shadow h-100 py-2">
+          <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
               <div class="row no-gutters align-items-center">
                 <div class="col mr-2">
                   <div
                     class="text-xs font-weight-bold text-warning text-uppercase mb-1"
                   >
-                    Awaiting Status
+                    Status
                   </div>
-                  <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                  <div class="h5 mb-0 font-weight-bold text-gray-800">
+                    Beneficiary
+                  </div>
                 </div>
                 <div class="col-auto">
-                  <i class="fas fa-comments fa-2x text-gray-300"></i>
+                  <i class="fas fa-stamp fa-2x text-gray-300"></i>
                 </div>
               </div>
             </div>
@@ -345,6 +353,7 @@ content%}
       </div>
     </div>
     <!-- /.container-fluid -->
+    {%endif%}
   </div>
   <!-- End of Main Content -->
 </div>

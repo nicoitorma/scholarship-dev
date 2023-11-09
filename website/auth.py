@@ -1,18 +1,6 @@
 from flask import Blueprint, render_template, url_for, redirect, request, session
-import pyrebase
-
-firebaseConfig = {
-    'apiKey': "AIzaSyDfDh0fBA4OmCDWreHKHPA2DamVlS7jqyw",
-    'authDomain': "ako-bicol-a5403.firebaseapp.com",
-    'projectId': "ako-bicol-a5403",
-    'storageBucket': "ako-bicol-a5403.appspot.com",
-    'messagingSenderId': "126824501150",
-    'appId': "1:126824501150:web:7130b88bc6e141ff3fd08f",
-    "databaseURL": ""
-}
-
-cred = pyrebase.initialize_app(firebaseConfig)
-firebase = cred.auth()
+from pyrebase_config import user_auth
+from firebase_admin_config import admin_firestore as db
 
 auth = Blueprint('auth', __name__, static_folder='static',
                  template_folder='templates',)
@@ -22,10 +10,10 @@ auth = Blueprint('auth', __name__, static_folder='static',
 def login():
     if request.method == 'POST':
         email = request.form['em']
-        password = request.form['pass']
+        password = request.form['password']
         error = ''
         try:
-            user = firebase.sign_in_with_email_and_password(email, password)
+            user = user_auth.sign_in_with_email_and_password(email, password)
             if user:
                 session['email'] = email
                 session['username'] = user['displayName']
@@ -42,7 +30,33 @@ def login():
 
 @auth.route('/register', methods=['POST', 'GET'])
 def register():
-    return render_template('register.html')
+    result = ''
+    if request.method == 'POST':
+        f_name = request.form['fName']
+        l_name = request.form['lName']
+        email = request.form['em']
+        password = request.form['repeatPassword']
+
+        try:
+            # create student authentication
+            user = user_auth.create_user_with_email_and_password(
+                email=email, password=password)
+
+            # create student details
+            user_data = {
+                "name": f_name + ' ' + l_name,
+                "role": "student"
+            }
+
+            # Store user details in Firestore
+            db.collection('users').document(
+                user['email']).set(user_data)
+            result = 'Account successfully created'
+        except Exception as e:
+            result = e
+        return render_template('register.html', message=result)
+    else:
+        return render_template('register.html')
 
 
 @auth.route('/logout', methods=['POST'])

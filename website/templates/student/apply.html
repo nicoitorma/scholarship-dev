@@ -1,0 +1,155 @@
+{%extends 'base.html'%} {%block title%} Apply for Scholarship {%endblock%}
+{%block content%}
+<div class="container-fluid">
+  <div class="card o-hidden border-0 shadow-lg my-lg-5">
+    <div class="text-center pt-5">
+      <h1 class="h4 text-gray-900 mb-4">New Application for Scholarship</h1>
+    </div>
+    <div class="card-body p-0">
+      <!-- Nested Row within Card Body -->
+      <div class="row">
+        <div class="col">
+          <div class="pt-5 pl-5 pr-5">
+            <form
+              class="user"
+              action="#"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              <h1 class="h6 text-gray-900 mb-4">Personal Details</h1>
+              <!-- Form Group (Personal Details)-->
+              <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="fName"
+                    id="FirstName"
+                    placeholder="First Name"
+                    onblur="validateFirstName()"
+                    required
+                  />
+                  <small id="fNameError" class="error-message"></small>
+                </div>
+                <div class="col-sm-6">
+                  <input
+                    type="text"
+                    name="lName"
+                    class="form-control"
+                    id="LastName"
+                    placeholder="Last Name"
+                    onblur="validateLastName()"
+                    required
+                  />
+                  <small id="lNameError" class="error-message"></small>
+                </div>
+              </div>
+              <!-- Municipality -->
+              <div class="form-group">
+                <select class="form-control" name="municipality" required>
+                  <option value="default" disabled selected>
+                    Select a Municipality
+                  </option>
+                  <option value="Bagamano">Bagamanoc</option>
+                  <option value="Baras">Baras</option>
+                  <option value="Bato">Bato</option>
+                  <option value="Caramoran">Caramoran</option>
+                  <option value="Gigmoto">Gigmoto</option>
+                  <option value="Pandan">Pandan</option>
+                  <option value="Panganiban">Panganiban</option>
+                  <option value="San Andres">San Andres</option>
+                  <option value="San Miguel">San Miguel</option>
+                  <option value="Viga">Viga</option>
+                  <option value="Virac">Virac</option>
+                </select>
+
+                <small id="emailError" class="error-message"></small>
+              </div>
+              <div class="form-group">
+                <input
+                  type="text"
+                  name="school"
+                  class="form-control"
+                  id="school"
+                  placeholder="Current University / School"
+                  required
+                />
+              </div>
+              <div class="form-group row">
+                <div class="col-sm-6 mb-3 mb-sm-0">
+                  <input
+                    type="text"
+                    name="program"
+                    class="form-control"
+                    id="program"
+                    placeholder="Enrolled Program (Type full)"
+                    required
+                  /><small id="passwordError" class="error-message"></small>
+                </div>
+                <div class="col-sm-6">
+                  <input
+                    type="number"
+                    name="yearlevel"
+                    class="form-control"
+                    id="yearlevel"
+                    placeholder="Year level"
+                    required
+                  /><small id="confPassError" class="error-message"></small>
+                </div>
+              </div>
+              <!-- End Form Group (Personal Details)-->
+              <hr class="mt-5" />
+              <!-- Notice of Award -->
+
+              <div class="form-group">
+                <h1 class="h6 text-gray-900">
+                  Notice of Award (png, jpg, jpeg, pdf)
+                </h1>
+                <input
+                  type="file"
+                  name="file1"
+                  class="form-control pt-3 pb-5"
+                  autocomplete="off"
+                  required
+                />
+
+                <p class="text-danger">{{error}}</p>
+
+                <!-- Certificate of Enrollment-->
+                <hr class="mt-5" />
+                <h1 class="h6 text-gray-900">
+                  Certificate of Enrollment (png, jpg, jpeg, pdf)
+                </h1>
+
+                <input
+                  type="file"
+                  name="file2"
+                  class="form-control pt-3 pb-5"
+                  autocomplete="off"
+                  required
+                />
+
+                <p class="text-danger">{{error}}</p>
+              </div>
+              <div class="text-center p-5">
+                <button
+                  type="submit"
+                  id="form-submit"
+                  name="form-submit"
+                  class="btn btn-primary btn-user btn-block"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+
+            <div class="bg-gradient-info">
+              <p class="text-center text-white">{{message}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%endblock%}

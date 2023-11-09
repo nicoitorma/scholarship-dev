@@ -2,3 +2,5 @@ Flask
 firebase-admin
 pyrebase4
 Gunicorn
+flask-reuploaded
+flask-wtf
