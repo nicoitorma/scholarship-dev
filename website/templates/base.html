@@ -34,8 +34,10 @@
       href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css')}}"
       rel="stylesheet"
     />
-
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/admin_data.js') }}"></script>
   </head>
 
   <body id="page-top">
@@ -120,8 +122,9 @@
     <script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js')}}"></script>
 
     <!-- Chart scripts -->
-    <script src="{{ url_for('static', filename='js/demo/chart-area-demo.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/demo/chart-pie-demo.js')}}"></script>
+    <!--<script src="{{ url_for('static', filename='js/demo/chart-area-demo.js')}}"></script>-->
+    <!--<script src="{{ url_for('static', filename='js/demo/chart-pie-demo.js')}}"></script>-->
+    <script src="https://cdnjs.cloudfare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 
     <!-- Table scripts -->
     <script src="{{ url_for('static', filename='vendor/datatables/jquery.dataTables.min.js')}}"></script>

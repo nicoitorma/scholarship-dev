@@ -8,7 +8,9 @@
     class="sidebar-brand d-flex align-items-center justify-content-center"
     href="/"
   >
-    <div class="sidebar-brand-text mx-3">Welcome, Student</div>
+    <div class="sidebar-brand-text mx-3">
+      Welcome, {{session['user_data']['role']}}
+    </div>
   </a>
 
   <!-- Divider -->
@@ -28,6 +30,16 @@
   <!-- Heading -->
   <div class="sidebar-heading">Interface</div>
 
+  {% if session['user_data']['role'] == 'admin'%}
+  <!-- Nav Item - Pages Collapse Menu -->
+  <li class="nav-item">
+    <a class="nav-link" href="applicants" id="scholarship">
+      <i class="fas fa-fw fa-graduation-cap"></i>
+      <span>Applicants</span></a
+    >
+  </li>
+  {%endif%}
+
   <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
     <a class="nav-link" href="tables.html" id="Profile">
@@ -36,6 +48,16 @@
     >
   </li>
 
+  {% if session['user_data']['role'] == 'student'%}
+  <!-- Nav Item - Pages Collapse Menu -->
+  <li class="nav-item">
+    <a class="nav-link" href="applicants" id="scholarship">
+      <i class="fas fa-fw fa-graduation-cap"></i>
+      <span>Update Certificate of Grades</span></a
+    >
+  </li>
+  {%endif%} {% if session['user_data']['role'] == 'student' and
+  session['user_data']['scholarship']=='none'%}
   <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
     <a class="nav-link" href="apply" id="scholarship">
@@ -43,6 +65,7 @@
       <span>Apply for Scholarship</span></a
     >
   </li>
+  {%endif%}
 
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block" />

@@ -17,7 +17,7 @@ content%}
       </button>
 
       <!-- Topbar Name -->
-      <h2 class="text-dark">{{name}}</h2>
+      <h2 class="text-dark">{{session['user_data']['name']}}</h2>
 
       <!-- Topbar Navbar -->
       <ul class="navbar-nav ml-auto">
@@ -49,13 +49,7 @@ content%}
             aria-haspopup="true"
             aria-expanded="false"
           >
-            <span class="mr-2 d-none d-lg-inline text-gray-600 small"
-              >idNumber</span
-            >
-            <img
-              class="img-profile rounded-circle"
-              src="img/undraw_profile.svg"
-            />
+            <i class="fas fa-user rounded-circle"></i>
           </a>
           <!-- Dropdown - User Information -->
           <div
@@ -86,7 +80,7 @@ content%}
     </nav>
     <!-- End of Topbar -->
 
-    {% if scholarship=='none' %}
+    {% if session['user_data']['scholarship']=='none' %}
     <div class="container-fluid">
       {% include 'student/no_scholarship.html'%}
     </div>
@@ -119,7 +113,7 @@ content%}
                     Scholarship Type
                   </div>
                   <div class="h5 mb-0 font-weight-bold text-gray-800">
-                    {{scholarship}}
+                    {{session['user_data']['scholarship']}}
                   </div>
                 </div>
                 <div class="col-auto">
@@ -206,29 +200,6 @@ content%}
 
       <!-- Content Row -->
       <div class="row">
-        <!-- Area Chart -->
-        <div class="col">
-          <div class="card shadow mb-4">
-            <!-- Card Header - Dropdown -->
-            <div
-              class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
-            >
-              <h6 class="m-0 font-weight-bold text-primary">
-                Scholarship Overview
-              </h6>
-            </div>
-            <!-- Card Body -->
-            <div class="card-body">
-              <div class="chart-area">
-                <canvas id="myAreaChart"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content Row -->
-      <div class="row">
         <!-- Content Column -->
         <div class="col mb-4">
           <!-- Project Card Example -->
@@ -249,7 +220,7 @@ content%}
                       <th>Date</th>
                       <th>Semester / Year level</th>
                       <th>Amount</th>
-                      <th>Stub No</th>
+                      <th>Reference No</th>
                       <th>Status</th>
                     </tr>
                   </thead>

@@ -18,7 +18,7 @@ def login():
                 session['email'] = email
                 session['username'] = user['displayName']
 
-                return redirect(url_for('views.index'))
+            return redirect(url_for('views.index'))
         except:
             error = 'Invalid email or password.'
             return render_template('login.html', error=error)

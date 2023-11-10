@@ -1,38 +1,55 @@
-from flask import Blueprint, session, render_template, redirect, url_for, request, flash
+from flask import Blueprint, session, render_template, redirect, url_for, request, g
 from firebase_admin_config import admin_firestore as db
+from pyrebase_config import bucket
+import os
+import json
 
 views = Blueprint('views', __name__, static_folder='static',
                   template_folder='templates')
 
-
-def get_user_role():
-    return 'student'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
 @views.route('/')
 def index():
     if 'email' in session:
         email = session['email']
-        user_role = get_user_role()
-
         data = db.collection('users').document(email).get()
-        user_data = data.to_dict()
-        name = user_data['name']
-        scholarship = user_data['scholarship']
+        user = data.to_dict()
+        user_role = user['role']
 
         if user_role == 'student':
-            return render_template('student/index.html', name=name,  scholarship=scholarship, user_role=user_role)
+            session['user_data'] = {
+                'name': user['name'],
+                'role': user_role,
+                'scholarship': user['scholarship']
+            }
+
+            return render_template('student/index.html')
         elif user_role == 'admin':
-            return render_template('admin/index.html')
+
+            session['user_data'] = {
+                'name': user['name'],
+                'role': user_role,
+            }
+            doc1_ref = db.collection('admin').document('municipality')
+            doc2_ref = db.collection('admin').document('grantees')
+
+            doc1_data = doc1_ref.get().to_dict()
+            doc2_data = doc2_ref.get().to_dict()
+
+            return render_template('admin/index.html', data1=json.dumps(doc1_data), data2=json.dumps(doc2_data))
     else:
         return redirect(url_for('auth.login'))
 
 
+def is_allowed(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @views.route('/apply', methods=['POST', 'GET'])
 def apply():
-    ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
     if 'email' in session:
-        print(request.method)
         if request.method == 'POST':
             if 'file1' not in request.files or 'file2' not in request.files:
                 print('No file uploaded')
@@ -46,19 +63,29 @@ def apply():
             file1 = request.files['file1']
             file2 = request.files['file2']
 
-            try:
-                # create student details
-                user_data = {
-                    'name': f_name + ' ' + l_name,
-                    'municipality': municipality,
-                    'school': school,
-                    'program': program,
-                    'year_level': year_level
-                }
+            # create student details
+            form_field = {
+                'name': f_name + ' ' + l_name,
+                'municipality': municipality,
+                'school': school,
+                'program': program,
+                'year_level': year_level
+            }
 
-                print(user_data)
+            try:
                 # Store user details in Firestore
-                # db.collection('applicants').document(session['email']).set(user_data)
+                db.collection('applicants').document(
+                    session['email']).set(form_field)
+
+                # Store NOA and COE pic in fbase storage
+                folder_name = '/'.join([str(municipality),
+                                       str(session['email'])])
+                file1_name = str(folder_name) + '/' + str(file1.filename)
+                file2_name = str(folder_name) + '/' + str(file2.filename)
+
+                bucket.child(file1_name).put(file1)
+                bucket.child(file2_name).put(file2)
+
                 result = 'Application Submitted'
             except Exception as e:
                 result = e
@@ -66,3 +93,10 @@ def apply():
         return render_template('student/apply.html')
     else:
         return redirect(url_for('auth.login'))
+
+
+# FOR ADMIN
+
+@views.route('/applicants')
+def fetch():
+    return "<h2>APPLICANTS</h2>"
