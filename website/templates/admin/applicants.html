@@ -55,14 +55,15 @@
                     <a
                       class="text-success"
                       href="#"
-                      onclick="showConfirmation('{{ entry.key }}', 'accept')"
+                      onclick="showConfirmation('{{ entry.key }}', '{{entry.email}}', 'accept')"
                     >
                       Accept
                     </a>
+                    <div></div>
                     <a
                       class="text-danger"
                       href="#"
-                      onclick="showConfirmation('{{ entry.key }}', 'reject')"
+                      onclick="showConfirmation('{{ entry.key }}', '{{entry.email}}', 'reject')"
                     >
                       Reject
                     </a>

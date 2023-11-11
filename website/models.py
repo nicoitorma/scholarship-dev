@@ -1,5 +1,6 @@
 class Applicant:
-    def __init__(self, key, name, municipality, school, program, year_level, noa_link, coe_link):
+    def __init__(self, key, email, name, municipality, school, program, year_level, noa_link, coe_link):
+        self.email = email
         self.key = key
         self.name = name
         self.municipality = municipality

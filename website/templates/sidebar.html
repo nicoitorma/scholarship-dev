@@ -33,14 +33,14 @@
   {% if session['user_data']['role'] == 'admin'%}
   <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
-    <a class="nav-link" href="applicants" id="scholarship">
+    <a class="nav-link" href="applicants" id="Applicants">
       <i class="fas fa-fw fa-graduation-cap"></i>
       <span>Applicants</span></a
     >
   </li>
   {%endif%}
 
-  <!-- Nav Item - Pages Collapse Menu -->
+  <!-- Nav Item - Profile -->
   <li class="nav-item">
     <a class="nav-link" href="profile" id="Profile">
       <i class="fas fa-fw fa-user"></i>
@@ -50,21 +50,28 @@
 
   {% if session['user_data']['role'] == 'student' and not
   session['user_data']['scholarship'] == 'None'%}
-  <!-- Nav Item - Pages Collapse Menu -->
+  <!-- Nav Item - Update Certificate of Grades -->
   <li class="nav-item">
-    <a class="nav-link" href="applicants" id="scholarship">
+    <a class="nav-link" href="applicants" id="coe">
       <i class="fas fa-fw fa-graduation-cap"></i>
       <span>Update Certificate of Grades</span></a
     >
   </li>
   {%endif%} {% if session['user_data']['role'] == 'student' and
-  session['user_data']['status'] != 'Pending' and
+  session['user_data']['status'] not in ['Pending', 'Beneficiary'] and
   session['user_data']['scholarship']=='None'%}
-  <!-- Nav Item - Pages Collapse Menu -->
+  <!-- Nav Item - Apply for Scholarship -->
   <li class="nav-item">
     <a class="nav-link" href="apply" id="scholarship">
       <i class="fas fa-fw fa-graduation-cap"></i>
       <span>Apply for Scholarship</span></a
+    >
+  </li>
+  {%endif%} {% if session['user_data']['role'] == 'admin'%}
+  <li class="nav-item">
+    <a class="nav-link" href="payout" id="payout">
+      <i class="fas fa-cc-apple-pay"></i>
+      <span>Payout</span></a
     >
   </li>
   {%endif%}

@@ -48,7 +48,8 @@ def register():
                 'name': f_name + ' ' + l_name,
                 'role': 'student',
                 'scholarship': 'None',
-                'status': 'None'
+                'status': 'None',
+                'email': email
             }
 
             # Store user details in Firestore
@@ -56,8 +57,8 @@ def register():
                 user['email']).set(user_data)
             result = 'Account successfully created'
         except Exception as e:
-            result = e
-        return render_template('register.html', message=result)
+            error = e
+        return render_template('register.html', message=result, error=error)
     else:
         return render_template('register.html')
 

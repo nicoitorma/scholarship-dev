@@ -1,6 +1,7 @@
 from flask import Blueprint, session, render_template, redirect, url_for, request, jsonify
 from firebase_admin_config import admin_firestore as db
 from pyrebase_config import bucket
+from firebase_admin import firestore
 import json
 from .models import Applicant
 
@@ -102,7 +103,8 @@ def apply():
                         'program': program,
                         'year_level': year_level,
                         'noa_link': file1_link,
-                        'coe_link': file2_link
+                        'coe_link': file2_link,
+                        'email': email
                     }
                 })
 
@@ -118,7 +120,13 @@ def apply():
         return redirect(url_for('auth.login'))
 
 
+@views.route('/profile')
+def profile():
+    return '<h2>TODO: PROFILEEEEEEE</h2>'
+
 # FOR ADMIN
+
+
 @views.route('/admin')
 def admin(user):
     session['user_data'] = {
@@ -137,7 +145,7 @@ def admin(user):
 
 
 @views.route('/applicants')
-def fetch_applicants():
+def applicants():
     if 'email' in session:
         documents = db.collection('admin').document('applicants').get()
 
@@ -145,7 +153,7 @@ def fetch_applicants():
         doc_data = documents.to_dict()
         for key, value in doc_data.items():
             applicants.append(Applicant(
-                key, value['name'], value['municipality'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link']))
+                key, value['email'], value['name'], value['municipality'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link']))
 
         return render_template('admin/applicants.html', applicants=applicants)
     return redirect(url_for('auth.login'))
@@ -155,11 +163,22 @@ def fetch_applicants():
 def process_action():
     data = request.get_json()
     applicant_id = data['id']
+    applicant_email = data['email']
     action = data['action']
 
-    print(applicant_id)
-    print(action)
-    # Perform the necessary action (accept or reject) based on the provided data
-    # Add your logic here
+    doc_ref = db.collection('admin').document('applicants')
+    user_ref = db.collection('users').document(applicant_email)
 
-    return jsonify({'status': 'success'})
+    if action == 'accept':
+        user_ref.update({'status': 'Beneficiary'})
+    else:
+        user_ref.update({'status': 'Rejected'})
+
+    doc_ref.update({applicant_id: firestore.DELETE_FIELD})
+
+    return redirect(url_for('views.applicants'))
+
+
+@views.route('/payout')
+def payout():
+    return '<h2>PAYOUTTTT NAAAA</h2>'
