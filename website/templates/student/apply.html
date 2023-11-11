@@ -1,10 +1,14 @@
 {%extends 'base.html'%} {%block title%} Apply for Scholarship {%endblock%}
 {%block content%}
+
 <div class="container-fluid">
   <div class="card o-hidden border-0 shadow-lg my-lg-5">
     <div class="text-center pt-5">
       <h1 class="h4 text-gray-900 mb-4">New Application for Scholarship</h1>
     </div>
+
+    <p class="text-center text-success">{{message}}</p>
+
     <div class="card-body p-0">
       <!-- Nested Row within Card Body -->
       <div class="row">
@@ -142,10 +146,6 @@
                 </button>
               </div>
             </form>
-
-            <div class="bg-gradient-info">
-              <p class="text-center text-white">{{message}}</p>
-            </div>
           </div>
         </div>
       </div>

@@ -42,13 +42,14 @@
 
   <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
-    <a class="nav-link" href="tables.html" id="Profile">
+    <a class="nav-link" href="profile" id="Profile">
       <i class="fas fa-fw fa-user"></i>
       <span>Profile</span></a
     >
   </li>
 
-  {% if session['user_data']['role'] == 'student'%}
+  {% if session['user_data']['role'] == 'student' and not
+  session['user_data']['scholarship'] == 'None'%}
   <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
     <a class="nav-link" href="applicants" id="scholarship">
@@ -57,7 +58,8 @@
     >
   </li>
   {%endif%} {% if session['user_data']['role'] == 'student' and
-  session['user_data']['scholarship']=='none'%}
+  session['user_data']['status'] != 'Pending' and
+  session['user_data']['scholarship']=='None'%}
   <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
     <a class="nav-link" href="apply" id="scholarship">

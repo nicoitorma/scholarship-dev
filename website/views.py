@@ -1,13 +1,24 @@
-from flask import Blueprint, session, render_template, redirect, url_for, request, g
+from flask import Blueprint, session, render_template, redirect, url_for, request, jsonify
 from firebase_admin_config import admin_firestore as db
 from pyrebase_config import bucket
-import os
 import json
+from .models import Applicant
 
 views = Blueprint('views', __name__, static_folder='static',
                   template_folder='templates')
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
+
+def get_applicants_count():
+    """
+    The function `get_applicants_count` retrieves the number of applicants from a database collection.
+    :return: the count of applicants stored in the 'applicants' document in the 'admin' collection in
+    the database.
+    """
+    documents = db.collection('admin').document('applicants').get()
+    doc_data = documents.to_dict()
+    return len(doc_data)
 
 
 @views.route('/')
@@ -22,28 +33,25 @@ def index():
             session['user_data'] = {
                 'name': user['name'],
                 'role': user_role,
-                'scholarship': user['scholarship']
+                'scholarship': user['scholarship'],
+                'status': user['status']
             }
 
             return render_template('student/index.html')
         elif user_role == 'admin':
-
-            session['user_data'] = {
-                'name': user['name'],
-                'role': user_role,
-            }
-            doc1_ref = db.collection('admin').document('municipality')
-            doc2_ref = db.collection('admin').document('grantees')
-
-            doc1_data = doc1_ref.get().to_dict()
-            doc2_data = doc2_ref.get().to_dict()
-
-            return render_template('admin/index.html', data1=json.dumps(doc1_data), data2=json.dumps(doc2_data))
+            return admin(user=user)
     else:
         return redirect(url_for('auth.login'))
 
 
 def is_allowed(filename):
+    """
+    The function checks if a filename has an allowed extension.
+
+    :param filename: The `filename` parameter is a string that represents the name of a file
+    :return: a boolean value. It checks if the given filename has a dot (.) in it and if the file
+    extension (the part after the last dot) is in the list of allowed extensions.
+    """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
@@ -62,29 +70,44 @@ def apply():
             year_level = request.form['yearlevel']
             file1 = request.files['file1']
             file2 = request.files['file2']
-
-            # create student details
-            form_field = {
-                'name': f_name + ' ' + l_name,
-                'municipality': municipality,
-                'school': school,
-                'program': program,
-                'year_level': year_level
-            }
+            email = session['email']
+            key = get_applicants_count()
 
             try:
-                # Store user details in Firestore
-                db.collection('applicants').document(
-                    session['email']).set(form_field)
+                # db connections
+                doc_ref = db.collection('admin').document('applicants')
+                user_ref = db.collection('users').document(email)
 
-                # Store NOA and COE pic in fbase storage
+                # Storage
                 folder_name = '/'.join([str(municipality),
-                                       str(session['email'])])
+                                       email])
                 file1_name = str(folder_name) + '/' + str(file1.filename)
                 file2_name = str(folder_name) + '/' + str(file2.filename)
 
-                bucket.child(file1_name).put(file1)
-                bucket.child(file2_name).put(file2)
+                # Store NOA and COE pic in fbase storage
+                bucket.child(file1_name).put(file1, session['idToken'])
+                bucket.child(file2_name).put(file2, session['idToken'])
+
+                file1_link = bucket.child(
+                    file1_name).get_url(session['idToken'])
+                file2_link = bucket.child(
+                    file2_name).get_url(session['idToken'])
+
+                # Store user details in Firestore
+                doc_ref.update({
+                    str(key): {
+                        'name': f_name + ' ' + l_name,
+                        'municipality': municipality,
+                        'school': school,
+                        'program': program,
+                        'year_level': year_level,
+                        'noa_link': file1_link,
+                        'coe_link': file2_link
+                    }
+                })
+
+                # Update status of user for scholarship
+                user_ref.update({'status': 'Pending'})
 
                 result = 'Application Submitted'
             except Exception as e:
@@ -96,7 +119,47 @@ def apply():
 
 
 # FOR ADMIN
+@views.route('/admin')
+def admin(user):
+    session['user_data'] = {
+        'name': user['name'],
+        'role': user['role']
+    }
+    doc1_ref = db.collection('admin').document('municipality')
+    doc2_ref = db.collection('admin').document('grantees')
+    grantees = db.collection('users').where(
+        'scholarship', '!=', 'none')
+
+    doc1_data = doc1_ref.get().to_dict()
+    doc2_data = doc2_ref.get().to_dict()
+
+    return render_template('admin/index.html', appli_count=get_applicants_count(), data1=json.dumps(doc1_data), data2=json.dumps(doc2_data))
+
 
 @views.route('/applicants')
-def fetch():
-    return "<h2>APPLICANTS</h2>"
+def fetch_applicants():
+    if 'email' in session:
+        documents = db.collection('admin').document('applicants').get()
+
+        applicants = []
+        doc_data = documents.to_dict()
+        for key, value in doc_data.items():
+            applicants.append(Applicant(
+                key, value['name'], value['municipality'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link']))
+
+        return render_template('admin/applicants.html', applicants=applicants)
+    return redirect(url_for('auth.login'))
+
+
+@views.route('/process_action', methods=['POST'])
+def process_action():
+    data = request.get_json()
+    applicant_id = data['id']
+    action = data['action']
+
+    print(applicant_id)
+    print(action)
+    # Perform the necessary action (accept or reject) based on the provided data
+    # Add your logic here
+
+    return jsonify({'status': 'success'})

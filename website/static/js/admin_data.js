@@ -76,3 +76,44 @@ function renderPieChart(divId, data) {
     },
   });
 }
+
+// Handle Accept and Reject click on Applicants table
+// script.js
+
+var currentApplicantId;
+var currentAction;
+
+function showConfirmation(applicantId, action) {
+    currentApplicantId = applicantId;
+    currentAction = action;
+
+    // Update the text in the modal based on the action
+    document.getElementById('confirmationModalLabel').innerHTML = `Confirm ${action}`;
+    document.getElementById('confirmationModalBody').innerHTML = `Are you sure you want to ${action.toLowerCase()} this applicant?`;
+
+    // Open the confirmation modal
+    $('#confirmationModal').modal('show');
+}
+
+function performAction() {
+    // Make an AJAX request to the Flask route with the applicant ID and action
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/process_action", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log('Action performed successfully:', currentAction);
+
+            // Close the confirmation modal
+            $('#confirmationModal').modal('hide');
+        }
+    };
+
+    var data = JSON.stringify({ id: currentApplicantId, action: currentAction });
+    xhr.send(data);
+}
+
+// Attach event listener to the Confirm button in the modal
+document.getElementById('confirmActionButton').addEventListener('click', performAction);
+ 

@@ -4,3 +4,4 @@ pyrebase4
 Gunicorn
 flask-reuploaded
 flask-wtf
+flask-login

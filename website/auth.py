@@ -17,10 +17,11 @@ def login():
             if user:
                 session['email'] = email
                 session['username'] = user['displayName']
+                session['idToken'] = user['idToken']
 
             return redirect(url_for('views.index'))
         except:
-            error = 'Invalid email or password.'
+            error = 'Incorrect email or password.'
             return render_template('login.html', error=error)
     else:
         if 'email' in session:
@@ -44,8 +45,10 @@ def register():
 
             # create student details
             user_data = {
-                "name": f_name + ' ' + l_name,
-                "role": "student"
+                'name': f_name + ' ' + l_name,
+                'role': 'student',
+                'scholarship': 'None',
+                'status': 'None'
             }
 
             # Store user details in Firestore

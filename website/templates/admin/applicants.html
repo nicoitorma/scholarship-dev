@@ -1,2 +1,80 @@
 {%extends 'base.html'%} {%block title%} Ako Bicol - Applicants {%endblock%}
-{%block content%} {%endblock%}
+{%block content%}
+<div class="container-fluid">
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Applicants</h1>
+    <a
+      href="#"
+      class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
+      ><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a
+    >
+  </div>
+  <!-- End Page Heading -->
+
+  <div class="row">
+    <!-- Content Column -->
+    <div class="col mb-4">
+      <!-- Project Card Example -->
+      <div class="card shadow mb-4">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table
+              class="table table-bordered"
+              id="dataTable"
+              width="100%"
+              cellspacing="0"
+            >
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Municipality</th>
+                  <th>School</th>
+                  <th>Program</th>
+                  <th>Year level</th>
+                  <th>Notice of Award</th>
+                  <th>Certificate of Enrollment</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {%for entry in applicants%}
+                <tr>
+                  <td>{{entry.name}}</td>
+                  <td>{{entry.municipality}}</td>
+                  <td>{{entry.school}}</td>
+                  <td>{{entry.program}}</td>
+                  <td>{{entry.year_level}}</td>
+                  <td><a href="{{entry.noa_link}}">View NoA</a></td>
+                  <td>
+                    <a href="{{entry.coe_link}}">View CoE</a>
+                  </td>
+
+                  <td>
+                    <a
+                      class="text-success"
+                      href="#"
+                      onclick="showConfirmation('{{ entry.key }}', 'accept')"
+                    >
+                      Accept
+                    </a>
+                    <a
+                      class="text-danger"
+                      href="#"
+                      onclick="showConfirmation('{{ entry.key }}', 'reject')"
+                    >
+                      Reject
+                    </a>
+                  </td>
+                </tr>
+                {%endfor%}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%endblock%}

@@ -81,6 +81,11 @@
                         Login
                       </button>
                     </form>
+                    {%if error%}
+                    <div class="text-center pt-2 text-danger">
+                      <p class="small">{{error}}</p>
+                    </div>
+                    {%endif%}
                     <hr />
                     <div class="text-center">
                       <a id="forgot_pass" class="small">Forgot Password?</a>

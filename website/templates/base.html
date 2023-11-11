@@ -37,13 +37,22 @@
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/admin_data.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin_data.js')}}"></script>
   </head>
 
   <body id="page-top">
     <!-- Page Wrapper -->
     <div id="wrapper">
-      {% include 'sidebar.html' %} {%block content%} {%endblock%}
+      {% include 'sidebar.html' %}
+      <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Main Content -->
+        <div class="content">
+          <!-- Topbar-->
+          {%include 'topbar.html'%}
+          <!-- Main Content-->
+          {%block content%} {%endblock%}
+        </div>
+      </div>
     </div>
     <!-- End of Page Wrapper -->
     {%include 'footer.html'%}
@@ -86,6 +95,49 @@
       </div>
     </div>
 
+    <!-- Applicant confirmation action-->
+    <div
+      class="modal fade"
+      id="confirmationModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="confirmationModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="confirmationModalLabel">
+              Scholarship Applicant
+            </h5>
+            <button
+              class="close"
+              type="button"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" id="confirmationModalBody">
+            Are you sure you want to perform this action?
+          </div>
+          <div class="modal-footer">
+            <button
+              class="btn btn-secondary"
+              type="button"
+              data-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <a id="confirmActionButton" class="btn btn-primary" href="#"
+              >Confirm</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       $(document).ready(function () {
         $("#logoutButton").click(function (event) {
@@ -122,13 +174,13 @@
     <script src="{{ url_for('static', filename='vendor/chart.js/Chart.min.js')}}"></script>
 
     <!-- Chart scripts -->
-    <!--<script src="{{ url_for('static', filename='js/demo/chart-area-demo.js')}}"></script>-->
-    <!--<script src="{{ url_for('static', filename='js/demo/chart-pie-demo.js')}}"></script>-->
     <script src="https://cdnjs.cloudfare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+    <!-- Script for admin panel -->
+    <script src="{{ url_for('static', filename='js/admin_data.js')}}"></script>
 
     <!-- Table scripts -->
     <script src="{{ url_for('static', filename='vendor/datatables/jquery.dataTables.min.js')}}"></script>
     <script src="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/demo/datatables-demo.js')}}"></script>
   </body>
 </html>
