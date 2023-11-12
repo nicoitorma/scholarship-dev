@@ -33,7 +33,7 @@
   {% if session['user_data']['role'] == 'admin'%}
   <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
-    <a class="nav-link" href="applicants" id="Applicants">
+    <a class="nav-link" href="/applicants" id="Applicants">
       <i class="fas fa-fw fa-graduation-cap"></i>
       <span>Applicants</span></a
     >
@@ -42,17 +42,17 @@
 
   <!-- Nav Item - Profile -->
   <li class="nav-item">
-    <a class="nav-link" href="profile" id="Profile">
+    <a class="nav-link" href="/profile" id="Profile">
       <i class="fas fa-fw fa-user"></i>
       <span>Profile</span></a
     >
   </li>
 
-  {% if session['user_data']['role'] == 'student' and not
-  session['user_data']['scholarship'] == 'None'%}
+  {% if session['user_data']['role'] == 'student' and
+  session['user_data']['status'] == 'Beneficiary'%}
   <!-- Nav Item - Update Certificate of Grades -->
   <li class="nav-item">
-    <a class="nav-link" href="applicants" id="coe">
+    <a class="nav-link" href="/coe" id="coe">
       <i class="fas fa-fw fa-graduation-cap"></i>
       <span>Update Certificate of Grades</span></a
     >
@@ -62,15 +62,15 @@
   session['user_data']['scholarship']=='None'%}
   <!-- Nav Item - Apply for Scholarship -->
   <li class="nav-item">
-    <a class="nav-link" href="apply" id="scholarship">
+    <a class="nav-link" href="/apply" id="apply">
       <i class="fas fa-fw fa-graduation-cap"></i>
       <span>Apply for Scholarship</span></a
     >
   </li>
   {%endif%} {% if session['user_data']['role'] == 'admin'%}
   <li class="nav-item">
-    <a class="nav-link" href="payout" id="payout">
-      <i class="fas fa-cc-apple-pay"></i>
+    <a class="nav-link" href="/payout" id="payout">
+      <i class="fas fa-fw fa-address-book"></i>
       <span>Payout</span></a
     >
   </li>

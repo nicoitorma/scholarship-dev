@@ -1,0 +1,69 @@
+{%extends 'base.html'%} {%block title%} Scholarship Payout {%endblock%} {%block
+sidebar_script %}
+<script>
+  $(document).ready(function () {
+    // Get the current URL path
+    var path = window.location.pathname;
+
+    // Highlight the active item based on the path
+    $(".nav-item").removeClass("active");
+    $('.nav-item a[href="' + path + '"]')
+      .parent()
+      .addClass("active");
+  });
+</script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+{%endblock%} {%block content%}
+
+<div class="container-fluid">
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Payout</h1>
+  </div>
+  <!-- End Page Heading -->
+
+  <div class="row">
+    <!-- Content Column -->
+    <div class="col mb-4">
+      <!-- Project Card Example -->
+      <div class="card shadow mb-4">
+        <div class="card-body">
+          <!-- QR Scanner and Students Info-->
+          <div class="row">
+            <!-- QR Scanner-->
+            <div class="col-xl-4 col-lg-5">
+              <div class="card shadow pb-3">
+                <!-- Card Header -->
+                <div
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
+                >
+                  <h6 class="m-0 font-weight-bold text-primary">
+                    Scan Scholarship Beneficiary QR Code
+                  </h6>
+                </div>
+                <!-- QR Scanner -->
+                <div class="card-body">
+                  <div class="chart-pie pt-4 mb-4">
+                    <div id="my-qr-reader"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- QR Result (Students Info)-->
+            <div class="col-xl-8 col-lg-7">
+              <div class="col">
+                <h5 class="text-dark" id="name"></h5>
+                <h5 class="text-dark" id="email"></h5>
+                <h5 class="text-dark" id="scholarship"></h5>
+                <h5 class="text-dark" id="status"></h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%endblock%}

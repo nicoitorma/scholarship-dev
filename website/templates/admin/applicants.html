@@ -1,5 +1,19 @@
 {%extends 'base.html'%} {%block title%} Ako Bicol - Applicants {%endblock%}
-{%block content%}
+{%block sidebar_script %}
+<script>
+  $(document).ready(function () {
+    // Get the current URL path
+    var path = window.location.pathname;
+
+    // Highlight the active item based on the path
+    $(".nav-item").removeClass("active");
+    $('.nav-item a[href="' + path + '"]')
+      .parent()
+      .addClass("active");
+  });
+</script>
+{% endblock %} {%block content%}
+
 <div class="container-fluid">
   <!-- Page Heading -->
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -18,6 +32,7 @@
       <!-- Project Card Example -->
       <div class="card shadow mb-4">
         <div class="card-body">
+          {%if applicants%}
           <div class="table-responsive">
             <table
               class="table table-bordered"
@@ -54,7 +69,6 @@
                   <td>
                     <a
                       class="text-success"
-                      href="#"
                       onclick="showConfirmation('{{ entry.key }}', '{{entry.email}}', 'accept')"
                     >
                       Accept
@@ -62,7 +76,6 @@
                     <div></div>
                     <a
                       class="text-danger"
-                      href="#"
                       onclick="showConfirmation('{{ entry.key }}', '{{entry.email}}', 'reject')"
                     >
                       Reject
@@ -73,6 +86,11 @@
               </tbody>
             </table>
           </div>
+          {%else%}
+          <h2 class="text-center text-info">
+            There are no scholarship applicants
+          </h2>
+          {%endif%}
         </div>
       </div>
     </div>

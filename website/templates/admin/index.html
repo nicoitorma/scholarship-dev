@@ -1,6 +1,18 @@
 {% extends 'base.html'%} {%block title%} Ako Bicol - Admin {%endblock%} {% block
-content%}
+sidebar_script %}
+<script>
+  $(document).ready(function () {
+    // Get the current URL path
+    var path = window.location.pathname;
 
+    // Highlight the active item based on the path
+    $(".nav-item").removeClass("active");
+    $('.nav-item a[href="' + path + '"]')
+      .parent()
+      .addClass("active");
+  });
+</script>
+{% endblock %} {% block content%}
 <!-- Begin Page Content -->
 <div class="container-fluid">
   <!-- Page Heading -->

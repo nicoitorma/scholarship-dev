@@ -104,7 +104,7 @@ function showConfirmation(applicantId, email, action) {
 function performAction() {
   // Make an AJAX request to the Flask route with the applicant ID and action
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/process_action", true);
+  xhr.open("POST", "/process", true);
   xhr.setRequestHeader("Content-Type", "application/json");
 
   xhr.onreadystatechange = function () {
@@ -128,3 +128,47 @@ function performAction() {
 document
   .getElementById("confirmActionButton")
   .addEventListener("click", performAction);
+
+
+// For QR Code
+function domReady(fn) { 
+  if ( 
+      document.readyState === "complete" || 
+      document.readyState === "interactive"
+  ) { 
+      setTimeout(fn, 1000); 
+  } else { 
+      document.addEventListener("DOMContentLoaded", fn); 
+  } 
+} 
+
+domReady(function () { 
+  function onScanSuccess(decodeText, decodeResult) {
+    // Send the QR code data to the Flask server
+    fetch('/qr_result', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ qrCodeData: decodeText }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        const nameElement = document.getElementById("name");
+        const emailElement = document.getElementById("email");
+          
+        nameElement.textContent = `${data.user.name}`;
+        emailElement.textContent = `${data.user.email}`;
+          
+      })
+      .catch(error => {
+        console.error('Error sending QR code data:', error);
+      });
+  }
+
+  let htmlscanner = new Html5QrcodeScanner( 
+      "my-qr-reader", 
+      { fps: 10, qrbos: 250 } 
+  ); 
+  htmlscanner.render(onScanSuccess); 
+});
