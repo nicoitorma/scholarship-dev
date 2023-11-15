@@ -3,7 +3,7 @@ from firebase_admin_config import admin_firestore as db
 from pyrebase_config import bucket
 from firebase_admin import firestore
 import json
-from .models import Applicant, User
+from .models import Applicant, User, Beneficiaries
 
 views = Blueprint('views', __name__, static_folder='static',
                   template_folder='templates')
@@ -365,4 +365,21 @@ def payout():
 
 @views.route('/beneficiaries')
 def beneficiaries():
-    return render_template('admin/beneficiaries.html')
+    if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:        
+        query = db.collection('users').get()
+        
+        beneficiaries = []
+        for doc in query:
+            data = doc.to_dict()
+            status = data.get('status')
+
+            # Count documents for each address
+            if status == 'Beneficiary':
+                beneficiaries.append(Beneficiaries(
+                data.get('name',''), data.get('municipality',''), data.get('school',''), data.get('program',''), data.get('year_level'), data.get('scholarship','')))
+
+        # This code block is handling the processing of an action (accept or reject) for an applicant in
+        # the admin panel.
+        return render_template('admin/beneficiaries.html', list=beneficiaries)
+    return redirect(url_for('auth.login'))
+    

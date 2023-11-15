@@ -1,7 +1,7 @@
 {%extends 'base.html'%} {%block title%} Scholarship Beneficiaries {%endblock%}
 {% block sidebar_script %}
 <script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
-<script src="{{ url_for('static', filename='js/dataTables.js')}}"></script>
+<script src="{{ url_for('static', filename='js/data_tables.js')}}"></script>
 {% endblock %} {%block content%}
 <div class="container-fluid">
   <!-- Page Heading -->
@@ -9,5 +9,46 @@
     <h1 class="h3 mb-0 text-gray-800">Scholarship Beneficiaries</h1>
   </div>
   <!-- End Page Heading -->
+  <div class="row">
+    <!-- Content Column -->
+    <div class="col mb-4">
+      <div class="card shadow mb-4">
+        <div class="row p-4">
+          <div class="table-responsive">
+            <table
+              class="table table-bordered"
+              id="dataTable"
+              width="100%"
+              cellspacing="0"
+            >
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Municipality</th>
+                  <th>School</th>
+                  <th>Program</th>
+                  <th>Year level</th>
+                  <th>Scholarship</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {%for entry in list%}
+                <tr>
+                  <td>{{entry.name}}</td>
+                  <td>{{entry.municipality}}</td>
+                  <td>{{entry.school}}</td>
+                  <td>{{entry.program}}</td>
+                  <td>{{entry.year_level}}</td>
+                  <td>{{entry.scholarship}}</td>
+                </tr>
+                {%endfor%}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {%endblock%}
