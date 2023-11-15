@@ -1,17 +1,7 @@
 {%extends 'base.html'%} {%block title%} Ako Bicol - Applicants {%endblock%}
 {%block sidebar_script %}
-<script>
-  $(document).ready(function () {
-    // Get the current URL path
-    var path = window.location.pathname;
-
-    // Highlight the active item based on the path
-    $(".nav-item").removeClass("active");
-    $('.nav-item a[href="' + path + '"]')
-      .parent()
-      .addClass("active");
-  });
-</script>
+<script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
+<script src="{{ url_for('static', filename='js/data_tables.js')}}"></script>
 {% endblock %} {%block content%}
 
 <div class="container-fluid">
@@ -96,4 +86,5 @@
     </div>
   </div>
 </div>
+
 {%endblock%}

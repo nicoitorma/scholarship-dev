@@ -1,17 +1,7 @@
 {% extends 'base.html'%} {%block title%} Ako Bicol - Admin {%endblock%} {% block
 sidebar_script %}
-<script>
-  $(document).ready(function () {
-    // Get the current URL path
-    var path = window.location.pathname;
+<script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
 
-    // Highlight the active item based on the path
-    $(".nav-item").removeClass("active");
-    $('.nav-item a[href="' + path + '"]')
-      .parent()
-      .addClass("active");
-  });
-</script>
 {% endblock %} {% block content%}
 <!-- Begin Page Content -->
 <div class="container-fluid">
@@ -28,7 +18,7 @@ sidebar_script %}
   <!-- Content Row -->
   <div class="row">
     <!-- Earnings (Monthly) Card Example -->
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="col-xl-6 col-md-6 mb-4">
       <div class="card border-left-primary shadow h-100 py-2">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
@@ -39,7 +29,7 @@ sidebar_script %}
                 Total Beneficiaries in Catanduanes
               </div>
               <div class="h5 mb-0 font-weight-bold text-gray-800">
-                {{num_beneficiaries}}
+                {{count_beneficiaries}}
               </div>
             </div>
             <div class="col-auto">
@@ -50,8 +40,8 @@ sidebar_script %}
       </div>
     </div>
 
-    <!-- Scholarship Allocation (Annual) Card -->
-    <div class="col-xl-4 col-md-6 mb-4">
+    <!-- Applicants Card -->
+    <div class="col-xl-6 col-md-6 mb-4">
       <div class="card border-left-dark shadow h-100 py-2">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
@@ -75,8 +65,8 @@ sidebar_script %}
       </div>
     </div>
 
-    <!-- Year Level Card -->
-    <div class="col-xl-4 col-md-6 mb-4">
+    <!-- Information Card -->
+    <!--<div class="col-xl-4 col-md-6 mb-4">
       <div class="card border-left-info shadow h-100 py-2">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
@@ -84,12 +74,12 @@ sidebar_script %}
               <div
                 class="text-xs font-weight-bold text-info text-uppercase mb-1"
               >
-                Year Level
+                Information
               </div>
               <div class="row no-gutters align-items-center">
                 <div class="col-auto">
                   <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
-                    2
+                    Ano pa ikahang ko uya?
                   </div>
                 </div>
               </div>
@@ -100,7 +90,7 @@ sidebar_script %}
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <div class="row">
@@ -112,7 +102,7 @@ sidebar_script %}
           class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
         >
           <h6 class="m-0 font-weight-bold text-primary">
-            Grantees per municipality
+            Beneficiaries per municipality
           </h6>
         </div>
         <!-- Card Body -->

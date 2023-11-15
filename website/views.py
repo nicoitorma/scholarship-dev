@@ -3,12 +3,12 @@ from firebase_admin_config import admin_firestore as db
 from pyrebase_config import bucket
 from firebase_admin import firestore
 import json
-from .models import Applicant
+from .models import Applicant, User
 
 views = Blueprint('views', __name__, static_folder='static',
                   template_folder='templates')
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
+ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf']
 STUDENT_ROLE = 'student'
 ADMIN_ROLE = 'admin'
 
@@ -33,26 +33,55 @@ def is_allowed(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def count_beneficiaries():
+    query = db.collection('users').where('status', '==', 'Beneficiary').get()
+    count = len(query)
+    return count
+
+
+def count_per_municipality():
+    query = db.collection('users').get()
+    municipality_count = {'Bagamanoc': 0, 'Panganiban': 0, 'Viga': 0, 'Virac': 0, 'Pandan': 0,
+                          'Caramoran': 0, 'Gigmoto': 0, 'Bato': 0, 'Baras': 0, 'San Andres': 0, 'San Miguel': 0}
+
+    for doc in query:
+        data = doc.to_dict()
+        municipality = data.get('municipality')
+        status = data.get('status')
+
+        # Count documents for each address
+        if municipality in municipality_count and status == 'Beneficiary':
+            municipality_count[municipality] += 1
+
+    return municipality_count
+
+
 @views.route('/')
 def index():
     if 'email' in session:
         email = session['email']
         data = db.collection('users').document(email).get()
-        user = data.to_dict()
-        user_role = user.get('role', '')
+        user_details = data.to_dict()
+        user_role = user_details.get('role', '')
 
         if user_role == STUDENT_ROLE:
             session['user_data'] = {
-                'name': user.get('name', ''),
+                'name': user_details.get('name'),
                 'role': user_role,
-                'scholarship': user.get('scholarship', ''),
-                'status': user.get('status', '')
+                'municipality': user_details.get('municipality', ''),
+                'scholarship': user_details.get('scholarship', ''),
+                'status': user_details.get('status', ''),
+                'allocation': user_details.get('allocation', '')
             }
             return render_template('student/index.html')
         elif user_role == ADMIN_ROLE:
-            return admin(user=user)
-    else:
-        return redirect(url_for('auth.login'))
+            session['user_data'] = {
+                'name': user_details.get('name', ''),
+                'role': user_role,
+            }
+            return admin()
+
+    return redirect(url_for('auth.login'))
 
 
 def handle_file_upload(file, folder_name):
@@ -64,6 +93,7 @@ def handle_file_upload(file, folder_name):
     :return: The file link in the Firebase storage.
     """
     file_name = f"{folder_name}/{file.filename}"
+    file.stream.seek(0)
     bucket.child(file_name).put(file, session['idToken'])
     return bucket.child(file_name).get_url(session['idToken'])
 
@@ -72,9 +102,6 @@ def handle_file_upload(file, folder_name):
 def apply():
     if 'email' in session and session['user_data'].get('status', '') == 'None':
         if request.method == 'POST':
-            if 'file1' not in request.files or 'file2' not in request.files:
-                print('No file uploaded')
-                return render_template('student/apply.html', error='No file uploaded')
 
             f_name = request.form.get('fName', '')
             l_name = request.form.get('lName', '')
@@ -87,18 +114,24 @@ def apply():
             email = session.get('email', '')
             key = get_applicants_count()
 
+            if file1 and is_allowed(file1):
+                return render_template('student/apply.html', error='Notice of Award file format is not supported')
+            if file2 and is_allowed(file2):
+                return render_template('student/apply.html', error='Certificate of Enrollment file format is not supported')
             try:
                 # db connections
-                doc_ref = db.collection('admin').document('applicants')
+                applicants_ref = db.collection('admin').document('applicants')
                 user_ref = db.collection('users').document(email)
 
                 # Storage
                 folder_name = f"{municipality}/{email}"
+                file1.stream.seek(0)
+                file2.stream.seek(0)
                 file1_link = handle_file_upload(file1, folder_name)
                 file2_link = handle_file_upload(file2, folder_name)
 
                 # Store user details in Firestore
-                doc_ref.update({
+                applicants_ref.update({
                     str(key): {
                         'name': f"{f_name} {l_name}",
                         'municipality': municipality,
@@ -112,110 +145,224 @@ def apply():
                 })
 
                 # Update status of user for scholarship
-                user_ref.update({'status': 'Pending'})
+                user_ref.update({
+                    'program': program,
+                    'school': school,
+                    'year_level': year_level,
+                    'municipality': municipality,
+                    'status': 'Pending'})
 
                 result = 'Application Submitted'
             except Exception as e:
                 result = str(e)
-
             return render_template('student/apply.html', message=result)
-
         return render_template('student/apply.html')
     else:
         return redirect(url_for('auth.login'))
 
 
+@views.route('/certificate-of-grades', methods=['POST', 'GET'])
+def cog():
+    result = ''
+    if 'email' in session:
+        if request.method == 'POST':
+            semester = request.form.get('semester')
+            school_year = request.form.get('school_year')
+            course_codes = request.form.getlist('courseCode[]')
+            units = request.form.getlist('units[]')
+            final_grades = request.form.getlist('finalGrade[]')
+            cog_file = request.files.get('cog', None)
+            email = session['email']
+
+            if cog_file:
+                data = {}
+
+                for code, unit, grade in zip(course_codes, units, final_grades):
+                    data[code] = {
+                        'units': int(unit),
+                        'final_grade': float(grade),
+                        'semester': semester,
+                        'school_year': school_year
+                    }
+                try:
+                    # Upload data to Firebase
+                    doc_ref = db.collection(
+                        'beneficiaries_cog').document(email)
+                    user_ref = db.collection('users').document(email)
+
+                    municipality = session['user_data'].get('municipality', '')
+
+                    folder_name = f"{municipality}/{email}"
+                    cog_file.stream.seek(0)
+                    cog_link = handle_file_upload(cog_file, folder_name)
+
+                    # Set the data in the document
+                    doc_ref.update(data)
+                    user_ref.update({
+                        'latest_cog': cog_link
+                    })
+
+                    result = 'Certificate of Grade is uploaded'
+                except Exception as e:
+                    result = e
+                return render_template('student/cog.html', message=result)
+
+        return render_template('student/cog.html')
+    return redirect(url_for('auth.login'))
+
+
 @views.route('/profile')
 def profile():
-    return '<h2>TODO: PROFILEEEEEEE</h2>'
+    if 'email' in session:
+        user_ref = db.collection('users').document(session['email']).get()
+        user_details = user_ref.to_dict()
+
+        user = User(user_details.get('name', ''), user_details.get('email', ''),
+                    user_details.get('municipality', ''), user_details.get('school', ''), user_details.get('program', ''), user_details.get('year_level', ''), user_details.get('scholarship', ''), user_details.get('status', ''))
+        return render_template('profile.html', user=user)
+    return redirect(url_for('auth.login'))
 
 
 # FOR ADMIN
 @views.route('/admin')
-def admin(user):
-    session['user_data'] = {
-        'name': user['name'],
-        'role': user['role']
-    }
-    doc1_ref = db.collection('admin').document('municipality')
+def admin():
     doc2_ref = db.collection('admin').document('grantees')
-    grantees = db.collection('users').where(
-        'scholarship', '!=', 'none')
-
-    doc1_data = doc1_ref.get().to_dict()
     doc2_data = doc2_ref.get().to_dict()
 
-    return render_template('admin/index.html', appli_count=get_applicants_count(), data1=json.dumps(doc1_data), data2=json.dumps(doc2_data))
+    return render_template('admin/index.html', count_beneficiaries=count_beneficiaries(), appli_count=get_applicants_count(), data1=count_per_municipality(), data2=json.dumps(doc2_data))
 
 
 @views.route('/applicants')
 def applicants():
+    # This code block is checking if the user is logged in and has the role of an admin. If both
+    # conditions are met, it retrieves the documents from the 'applicants' collection in the 'admin'
+    # document in Firestore. It then creates a list of Applicant objects using the data from the
+    # documents. Finally, it renders the 'admin/applicants.html' template with the list of applicants.
+    # If the user is not logged in or does not have the admin role, it redirects them to the login
+    # page.
     if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:
         documents = db.collection('admin').document('applicants').get()
-        print('HERE IN ACTION')
 
         applicants = []
         doc_data = documents.to_dict()
         for key, value in doc_data.items():
             applicants.append(Applicant(
-                key, value['email'], value['name'], value['municipality'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link']))
+                key, value['email'], value['name'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link'], value['municipality']))
 
-        print(len(applicants))
+    # This code block is handling the processing of an action (accept or reject) for an applicant in
+    # the admin panel.
         return render_template('admin/applicants.html', applicants=applicants)
     return redirect(url_for('auth.login'))
 
 
 @views.route('/process', methods=['POST'])
 def process_action():
+    # This code block is handling the processing of an action (accept or reject) for an applicant in
+    # the admin panel.
     if request.method == 'POST' and session['user_data'].get('role', '') == ADMIN_ROLE:
         data = request.get_json()
         applicant_id = data['id']
         applicant_email = data['email']
         action = data['action']
 
-        doc_ref = db.collection('admin').document('applicants')
+        applicants_ref = db.collection('admin').document('applicants')
         user_ref = db.collection('users').document(applicant_email)
+        beneficiaries_ref = db.collection(
+            'beneficiaries_cog').document(applicant_email)
+        beneficiaries_ref.set({})
 
         if action == 'accept':
-            user_ref.update({'status': 'Beneficiary'})
+            user_ref.update(
+                {'scholarship': 'StuFAP', 'status': 'Beneficiary', 'allocation': '7,750'})
         else:
             user_ref.update({'status': 'Rejected'})
 
-        doc_ref.update({applicant_id: firestore.DELETE_FIELD})
+        applicants_ref.update({applicant_id: firestore.DELETE_FIELD})
 
         return redirect(url_for('views.applicants'))
     else:
         return redirect(url_for('auth.login'))
 
 
-@views.route('/payout')
+def calculate_gwa(email):
+    try:
+        # Assuming you're using Firebase Firestore
+        documents = db.collection('beneficiaries_cog').document(email).get()
+
+        # Check if the document exists
+        if documents.exists:
+            doc_data = documents.to_dict()
+
+            # Dictionary to store GWA for each semester and school year
+            gwa_by_semester = {}
+
+            for key, value in doc_data.items():
+                # Check if the necessary fields exist in the document
+                if 'units' in value and 'final_grade' in value and 'school_year' in value and 'semester' in value:
+                    units = value['units']
+                    final_grade = value['final_grade']
+                    school_year = value['school_year']
+                    semester = value['semester']
+
+                    weighted_grades = units * final_grade
+
+                    # Initialize the semester's GWA if not present in the dictionary
+                    if (school_year, semester) not in gwa_by_semester:
+                        gwa_by_semester[(school_year, semester)] = {
+                            'total_units': 0, 'total_weighted_grades': 0}
+
+                    # Update the GWA for the semester
+                    gwa_by_semester[(school_year, semester)
+                                    ]['total_units'] += units
+                    gwa_by_semester[(school_year, semester)
+                                    ]['total_weighted_grades'] += weighted_grades
+
+            # Prepare data for Jinja template
+            gwa_data = []
+            for (school_year, semester), data in gwa_by_semester.items():
+                total_units = data['total_units']
+                total_weighted_grades = data['total_weighted_grades']
+
+                # Check if there are units to avoid division by zero
+                if total_units > 0:
+                    gwa = total_weighted_grades / total_units
+                    gwa_data.append(
+                        {'school_year': school_year, 'semester': semester, 'gwa': gwa})
+                else:
+                    gwa_data.append(
+                        {'school_year': school_year, 'semester': semester, 'gwa': 'Error: Total units is zero'})
+
+            return gwa_data
+
+        else:
+            return "Error: Document not found for email."
+
+    except Exception as e:
+        return "Error:" + str(e)
+
+
+@views.route('/payout', methods=['POST', 'GET'])
 def payout():
-    # return '<h2>PAYOUTTTT NAAAA</h2>'
+    # This code block is checking if the user is logged in and has the role of an admin. If both
+    # conditions are met, it allows the admin to access the payout page.
     if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:
-        documents = db.collection('admin').document('applicants').get()
-        print('HERE IN ACTION')
+        # For scanning QR Code
+        if request.method == 'POST':
+            data = request.get_json()
+            qr_code_data = data.get('qrCodeData')
 
-        applicants = []
-        doc_data = documents.to_dict()
-        for key, value in doc_data.items():
-            applicants.append(Applicant(
-                key, value['email'], value['name'], value['municipality'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link']))
+            documents = db.collection('users').document(qr_code_data).get()
+            user_details = documents.to_dict()
+            if user_details:
+                gwa = calculate_gwa(qr_code_data)
 
-        print(len(applicants))
+                user_details['gwa'] = gwa
+                return jsonify(user_details)
+            return jsonify({'message': 'Beneficiary not found'}), 404
         return render_template('admin/payout.html')
     return redirect(url_for('auth.login'))
 
 
-@views.route('qr_result', methods=['POST'])
-def qr_result():
-    data = request.get_json()
-    qr_code_data = data.get('qrCodeData')
-
-    print(qr_code_data)
-
-    # Send a response back to the client
-    return jsonify({'user': {
-        'name': 'Very long name',
-        'email': 'email.1@gmail.com'
-
-    }})
+@views.route('/beneficiaries')
+def beneficiaries():
+    return render_template('admin/beneficiaries.html')

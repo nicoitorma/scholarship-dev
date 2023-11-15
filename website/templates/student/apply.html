@@ -1,5 +1,18 @@
-{%extends 'base.html'%} {%block title%} Apply for Scholarship {%endblock%}
-{%block content%}
+{%extends 'base.html'%} {%block title%} Apply for Scholarship {%endblock%} {%
+block sidebar_script %}
+<script>
+  $(document).ready(function () {
+    // Get the current URL path
+    var path = window.location.pathname;
+
+    // Highlight the active item based on the path
+    $(".nav-item").removeClass("active");
+    $('.nav-item a[href="' + path + '"]')
+      .parent()
+      .addClass("active");
+  });
+</script>
+{% endblock %} {%block content%}
 
 <div class="container-fluid">
   <div class="card o-hidden border-0 shadow-lg my-lg-5">
@@ -35,7 +48,7 @@
                   />
                   <small id="fNameError" class="error-message"></small>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-6 mb-3 mb-sm-0">
                   <input
                     type="text"
                     name="lName"
@@ -48,6 +61,7 @@
                   <small id="lNameError" class="error-message"></small>
                 </div>
               </div>
+
               <!-- Municipality -->
               <div class="form-group">
                 <select class="form-control" name="municipality" required>
@@ -66,19 +80,22 @@
                   <option value="Viga">Viga</option>
                   <option value="Virac">Virac</option>
                 </select>
-
-                <small id="emailError" class="error-message"></small>
               </div>
+              <!-- Municipality -->
               <div class="form-group">
-                <input
-                  type="text"
-                  name="school"
-                  class="form-control"
-                  id="school"
-                  placeholder="Current University / School"
-                  required
-                />
+                <select class="form-control" name="school" required>
+                  <option value="default" disabled selected>
+                    Enrolled University / School
+                  </option>
+                  <option value="CatSU">Catanduanes State University</option>
+                  <option value="CPIC">
+                    Christian Polytechnic Institute of Catanduanes
+                  </option>
+                  <option value="CC">Catanduanes Colleges</option>
+                </select>
               </div>
+
+              <!-- Program and Year level -->
               <div class="form-group row">
                 <div class="col-sm-6 mb-3 mb-sm-0">
                   <input
@@ -102,9 +119,10 @@
                 </div>
               </div>
               <!-- End Form Group (Personal Details)-->
-              <hr class="mt-5" />
-              <!-- Notice of Award -->
 
+              <hr class="mt-5" />
+
+              <!-- Notice of Award -->
               <div class="form-group">
                 <h1 class="h6 text-gray-900">
                   Notice of Award (png, jpg, jpeg, pdf)

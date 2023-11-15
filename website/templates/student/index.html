@@ -1,6 +1,10 @@
-{%extends "base.html"%} {%block title%}Student Dashboard{%endblock%} {%block
-content%} {% if session['user_data']['scholarship']=='None' and
-session['user_data']['status'] == 'None'%}
+{%extends "base.html"%} {%block title%}Student Dashboard{%endblock%} {% block
+sidebar_script %}
+<script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
+<script src="{{ url_for('static', filename='js/data_tables.js')}}"></script>
+{% endblock %} {%block content%} {% if
+session['user_data']['scholarship']=='None' and session['user_data']['status']
+== 'None'%}
 <div class="container-fluid">{% include 'student/no_scholarship.html'%}</div>
 {%else%}
 
@@ -30,7 +34,7 @@ session['user_data']['status'] == 'None'%}
                 Scholarship Type
               </div>
               <div class="h5 mb-0 font-weight-bold text-gray-800">
-                {{session['user_data']['scholarship']}}
+                {{session['user_data'].get('scholarship', '')}}
               </div>
             </div>
             <div class="col-auto">
@@ -52,7 +56,9 @@ session['user_data']['status'] == 'None'%}
               >
                 Allocation (Semester)
               </div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">10,000</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                {{session['user_data'].get('allocation', '')}}
+              </div>
             </div>
             <div class="col-auto">
               <i class="fas fa-money-bill fa-2x text-gray-300"></i>

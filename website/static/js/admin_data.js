@@ -9,7 +9,7 @@ function renderBarChart(divId, data) {
       labels: labels,
       datasets: [
         {
-          label: "Student with scholarship",
+          label: "Beneficiaries count",
           data: values,
           backgroundColor: "#36b9cc",
           hoverBackgroundColor: "#36b9cc",
@@ -142,33 +142,116 @@ function domReady(fn) {
   } 
 } 
 
-domReady(function () { 
+domReady(function () {
+  let htmlscanner;
+
+  function startScanner() {
+    htmlscanner = new Html5QrcodeScanner(
+      "my-qr-reader",
+      { fps: 10, qrbos: 250 }
+    );
+    
+    htmlscanner.render(onScanSuccess);
+  }
+
   function onScanSuccess(decodeText, decodeResult) {
+    // Remove event listeners to stop the scanner
+    htmlscanner.pause();
+    
     // Send the QR code data to the Flask server
-    fetch('/qr_result', {
+    fetch('/payout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ qrCodeData: decodeText }),
     })
-      .then(response => response.json())
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        else if (response.status === 404) {
+          throw new Error('Beneficiary not found!');
+        }
+        else {
+          throw new Error('Unexpected error');
+        }
+      })
       .then(data => {
-        const nameElement = document.getElementById("name");
-        const emailElement = document.getElementById("email");
-          
-        nameElement.textContent = `${data.user.name}`;
-        emailElement.textContent = `${data.user.email}`;
-          
+        const userDetails = document.getElementById("userDetails");
+        userDetails.innerHTML = `
+        <h1 class="h5 mb-4 font-weight-bold text-primary">Beneficiary Informations</h1>
+        <h1 class="h6 text-dark" ><b>Name</b>: ${data.name}</h5>
+        <h1 class="h6 text-dark" ><b>Email</b>: ${data.email}</h1>
+        <h1 class="h6 text-dark" ><b>Municipality</b>: ${data.municipality}</h1>
+        <h1 class="h6 text-dark" ><b>School</b>: ${data.school}</h1>
+        <h1 class="h6 text-dark" ><b>Program</b>: ${data.program}</h1>
+        <h1 class="h6 text-dark" ><b>Year level</b>: ${data.year_level}</h1>
+        <h1 class="h6 text-dark" ><b>Scholarship</b>: ${data.scholarship}</h>
+        <h1 class="h6 text-dark" ><b>Scholarship status</b>: ${data.status}</h1>
+        `;
+
+        if (data.gwa == "Error: Document not found for email.") {
+          const gwaTable = document.getElementById("gwaTable");
+          gwaTable.innerHTML = ``;
+        }
+        else {
+      // Display GWA in the table
+      const gwaTable = document.getElementById("gwaTable");
+      gwaTable.innerHTML = `
+        <h1 class="h5 mb-2 font-weight-bold text-warning">GWA Records</h1>
+      <table class="table table-bordered"
+      id="dataTable"
+      width="100%"
+      cellspacing="0">
+        <tr>
+          <th><b>School Year</b></th>
+          <th><b>Semester</b></th>
+          <th><b>GWA</b></th>
+        </tr>
+        ${data.gwa.map(item => `
+          <tr>
+            <td>${item.school_year}</td>
+            <td>${item.semester}</td>
+            <td>${item.gwa !== null ? item.gwa.toFixed(2) : 'N/A'}</td>
+          </tr>
+        `).join('')}
+      </table>
+    `;
+        }
+
+        // Check if the status is Beneficiary
+        if (data.status === "Beneficiary") {
+          const payoutButtonContainer = document.getElementById("payoutButton");
+
+          // Create a button element
+          const payoutButton = document.createElement("button");
+          payoutButton.className = "btn btn-primary btn-warning";
+          payoutButton.textContent = "Release Payout";
+
+          // Append the button to the container
+          payoutButtonContainer.appendChild(payoutButton);
+        } 
+        else {
+          const payoutButtonContainer = document.getElementById("payoutButton");
+          payoutButtonContainer.innerHTML = ``;
+        }
+        // Restart the scanner after a successful scan
+        setTimeout(startScanner, 3000);
       })
       .catch(error => {
-        console.error('Error sending QR code data:', error);
-      });
+        if (error.message === 'Beneficiary not found!')
+        {
+          const userDetails = document.getElementById("userDetails");
+          userDetails.innerHTML = `
+          <h1 class="h3 mb-4 font-weight-bold text-danger">Beneficiary not found!</h1>`;
+        }
+
+        // Restart the scanner after an error
+        setTimeout(startScanner, 3000);
+      })
   }
 
-  let htmlscanner = new Html5QrcodeScanner( 
-      "my-qr-reader", 
-      { fps: 10, qrbos: 250 } 
-  ); 
-  htmlscanner.render(onScanSuccess); 
+  // Start the initial scanner
+  startScanner();
 });

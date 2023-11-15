@@ -20,7 +20,7 @@ def login():
                 session['idToken'] = user['idToken']
 
             return redirect(url_for('views.index'))
-        except:
+        except Exception:
             error = 'Incorrect email or password.'
             return render_template('login.html', error=error)
     else:
@@ -57,8 +57,8 @@ def register():
                 user['email']).set(user_data)
             result = 'Account successfully created'
         except Exception as e:
-            error = e
-        return render_template('register.html', message=result, error=error)
+            return render_template('register.html', error=e)
+        return render_template('register.html', message=result)
     else:
         return render_template('register.html')
 
@@ -66,6 +66,7 @@ def register():
 @auth.route('/logout', methods=['POST'])
 def logout():
     session.pop('email', None)
+    session.pop('user_data', None)
     return redirect(url_for('auth.login'))
 
 

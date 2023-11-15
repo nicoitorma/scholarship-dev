@@ -5,12 +5,15 @@
 >
   <!-- Sidebar - Brand -->
   <a
-    class="sidebar-brand d-flex align-items-center justify-content-center"
+    class="sidebar-brand d-flex align-items-center justify-content-center my-xl-5 my-lg-5 my-md-5 my-sm-5"
     href="/"
   >
-    <div class="sidebar-brand-text mx-3">
-      Welcome, {{session['user_data']['role']}}
-    </div>
+    <img
+      class="img-fluid sidebar-brand-icon"
+      src="https://akobicolpartylist.files.wordpress.com/2021/04/cropped-cropped-akb-logo-circle.png?w=1000&h=992"
+      width="130px"
+      height="130px"
+    />
   </a>
 
   <!-- Divider -->
@@ -30,8 +33,8 @@
   <!-- Heading -->
   <div class="sidebar-heading">Interface</div>
 
+  <!-- Applicants Item for Admin -->
   {% if session['user_data']['role'] == 'admin'%}
-  <!-- Nav Item - Pages Collapse Menu -->
   <li class="nav-item">
     <a class="nav-link" href="/applicants" id="Applicants">
       <i class="fas fa-fw fa-graduation-cap"></i>
@@ -40,24 +43,40 @@
   </li>
   {%endif%}
 
-  <!-- Nav Item - Profile -->
+  <!-- Beneficiaries Item for Admin -->
+  {% if session['user_data']['role'] == 'admin'%}
   <li class="nav-item">
-    <a class="nav-link" href="/profile" id="Profile">
-      <i class="fas fa-fw fa-user"></i>
-      <span>Profile</span></a
+    <a class="nav-link" href="/beneficiaries" id="payout">
+      <i class="fas fa-fw fa-address-book"></i>
+      <span>Beneficiaries</span></a
     >
   </li>
+  {%endif%}
 
+  <!-- Updating of Certificate of Grade of Student -->
   {% if session['user_data']['role'] == 'student' and
   session['user_data']['status'] == 'Beneficiary'%}
-  <!-- Nav Item - Update Certificate of Grades -->
   <li class="nav-item">
-    <a class="nav-link" href="/coe" id="coe">
-      <i class="fas fa-fw fa-graduation-cap"></i>
+    <a class="nav-link" href="/certificate-of-grades" id="cog">
+      <i class="fas fa-fw fa-certificate"></i>
       <span>Update Certificate of Grades</span></a
     >
   </li>
-  {%endif%} {% if session['user_data']['role'] == 'student' and
+  {%endif%}
+
+  <!-- Updating of Certificate of Enrollment of Student -->
+  {% if session['user_data']['role'] == 'student' and
+  session['user_data']['status'] == 'Beneficiary'%}
+  <li class="nav-item">
+    <a class="nav-link" href="/certificate-of-enrollment" id="coe">
+      <i class="fas fa-fw fa-file-image"></i>
+      <span>Update Certificate of Enrollment</span></a
+    >
+  </li>
+  {%endif%}
+
+  <!--Application for scholarship item-->
+  {% if session['user_data']['role'] == 'student' and
   session['user_data']['status'] not in ['Pending', 'Beneficiary'] and
   session['user_data']['scholarship']=='None'%}
   <!-- Nav Item - Apply for Scholarship -->
@@ -67,10 +86,13 @@
       <span>Apply for Scholarship</span></a
     >
   </li>
-  {%endif%} {% if session['user_data']['role'] == 'admin'%}
+  {%endif%}
+
+  <!-- Payout Item for Admin -->
+  {% if session['user_data']['role'] == 'admin'%}
   <li class="nav-item">
     <a class="nav-link" href="/payout" id="payout">
-      <i class="fas fa-fw fa-address-book"></i>
+      <i class="fas fa-fw fa-money-check"></i>
       <span>Payout</span></a
     >
   </li>

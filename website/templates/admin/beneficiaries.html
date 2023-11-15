@@ -1,0 +1,13 @@
+{%extends 'base.html'%} {%block title%} Scholarship Beneficiaries {%endblock%}
+{% block sidebar_script %}
+<script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
+<script src="{{ url_for('static', filename='js/dataTables.js')}}"></script>
+{% endblock %} {%block content%}
+<div class="container-fluid">
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Scholarship Beneficiaries</h1>
+  </div>
+  <!-- End Page Heading -->
+</div>
+{%endblock%}

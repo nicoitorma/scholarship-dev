@@ -1,17 +1,7 @@
 {%extends 'base.html'%} {%block title%} Scholarship Payout {%endblock%} {%block
 sidebar_script %}
-<script>
-  $(document).ready(function () {
-    // Get the current URL path
-    var path = window.location.pathname;
-
-    // Highlight the active item based on the path
-    $(".nav-item").removeClass("active");
-    $('.nav-item a[href="' + path + '"]')
-      .parent()
-      .addClass("active");
-  });
-</script>
+<script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
+<script src="{{ url_for('static', filename='js/data_tables.js')}}"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 {%endblock%} {%block content%}
 
@@ -29,10 +19,10 @@ sidebar_script %}
       <div class="card shadow mb-4">
         <div class="card-body">
           <!-- QR Scanner and Students Info-->
-          <div class="row">
-            <!-- QR Scanner-->
+          <div class="row mb-4">
+            <!-- Top Row-->
             <div class="col-xl-4 col-lg-5">
-              <div class="card shadow pb-3">
+              <div class="card">
                 <!-- Card Header -->
                 <div
                   class="card-header py-3 d-flex flex-row align-items-center justify-content-between"
@@ -43,7 +33,7 @@ sidebar_script %}
                 </div>
                 <!-- QR Scanner -->
                 <div class="card-body">
-                  <div class="chart-pie pt-4 mb-4">
+                  <div class="m-2">
                     <div id="my-qr-reader"></div>
                   </div>
                 </div>
@@ -51,13 +41,21 @@ sidebar_script %}
             </div>
 
             <!-- QR Result (Students Info)-->
-            <div class="col-xl-8 col-lg-7">
+            <div class="col-xl-6 col-lg-7 mb-4">
               <div class="col">
-                <h5 class="text-dark" id="name"></h5>
-                <h5 class="text-dark" id="email"></h5>
-                <h5 class="text-dark" id="scholarship"></h5>
-                <h5 class="text-dark" id="status"></h5>
+                <div id="userDetails"></div>
               </div>
+            </div>
+
+            <!-- Payout Button-->
+            <div class="col-xl-2 col-lg-5">
+              <div id="payoutButton"></div>
+            </div>
+          </div>
+
+          <div class="row m-1">
+            <div class="table-responsive">
+              <div id="gwaTable"></div>
             </div>
           </div>
         </div>
