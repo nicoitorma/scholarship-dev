@@ -11,9 +11,10 @@ class Applicant:
         self.coe_link = coe_link
 
 
-class User:
-    def __init__(self, name, email, municipality, school, program, year_level, scholarship, status):
+class Student:
+    def __init__(self, name=None, role=None, email=None, municipality=None, school=None, program=None, year_level=None, scholarship=None, status=None):
         self.name = name
+        self.role = role
         self.email = email
         self.municipality = municipality
         self.school = school
@@ -21,13 +22,15 @@ class User:
         self.year_level = year_level
         self.scholarship = scholarship
         self.status = status
-        
+
+
 class Beneficiaries:
-    def __init__(self, name, municipality, school, program, year_level, scholarship):
+    def __init__(self, name, municipality, school, program, year_level, scholarship, coe, cog):
         self.name = name
         self.municipality = municipality
         self.school = school
         self.program = program
         self.year_level = year_level
         self.scholarship = scholarship
-        
+        self.coe = coe
+        self.cog = cog

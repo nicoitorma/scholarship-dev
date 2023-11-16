@@ -184,9 +184,11 @@ domReady(function () {
         <h1 class="h6 text-dark" ><b>Name</b>: ${data.name}</h5>
         <h1 class="h6 text-dark" ><b>Email</b>: ${data.email}</h1>
         <h1 class="h6 text-dark" ><b>Municipality</b>: ${data.municipality}</h1>
+        <hr />
         <h1 class="h6 text-dark" ><b>School</b>: ${data.school}</h1>
         <h1 class="h6 text-dark" ><b>Program</b>: ${data.program}</h1>
         <h1 class="h6 text-dark" ><b>Year level</b>: ${data.year_level}</h1>
+        <hr/>
         <h1 class="h6 text-dark" ><b>Scholarship</b>: ${data.scholarship}</h>
         <h1 class="h6 text-dark" ><b>Scholarship status</b>: ${data.status}</h1>
         `;
@@ -198,7 +200,7 @@ domReady(function () {
         else {
       // Display GWA in the table
       const gwaTable = document.getElementById("gwaTable");
-      gwaTable.innerHTML = `
+          gwaTable.innerHTML = `
         <h1 class="h5 mb-2 font-weight-bold text-warning">GWA Records</h1>
       <table class="table table-bordered"
       id="dataTable"
@@ -209,11 +211,12 @@ domReady(function () {
           <th><b>Semester</b></th>
           <th><b>GWA</b></th>
         </tr>
-        ${data.gwa.map(item => `
+        ${data.gwa.map(item =>
+          `
           <tr>
             <td>${item.school_year}</td>
             <td>${item.semester}</td>
-            <td>${item.gwa !== null ? item.gwa.toFixed(2) : 'N/A'}</td>
+            <td>${item.gwa !== null ? item.gwa.toFixed(2) : 'No record'}</td>
           </tr>
         `).join('')}
       </table>

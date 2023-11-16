@@ -1,0 +1,67 @@
+{%extends 'base.html'%} {%block title%} Certificate of Enrollment {%endblock%}
+{%block sidebar_script%}
+<script>
+  $(document).ready(function () {
+    // Get the current URL path
+    var path = window.location.pathname;
+
+    // Highlight the active item based on the path
+    $(".nav-item").removeClass("active");
+    $('.nav-item a[href="' + path + '"]')
+      .parent()
+      .addClass("active");
+  });
+</script>
+{%endblock%} {%block content%}
+<div class="container-fluid">
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Certificate of Enrollment</h1>
+  </div>
+  <!-- End Page Heading -->
+
+  <!-- Main Content -->
+  <div class="row">
+    <!-- Content Row -->
+    <div class="col mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-body p-4">
+          <a href="{{cog}}">View Latest Certificate of Enrollment</a>
+          <div class="img-thumbnail mt-4 p-3">
+            <p class="text-center text-success mb-2">{{message}}</p>
+            <form
+              class="user"
+              action="#"
+              method="post"
+              enctype="multipart/form-data"
+            >
+              <h1 class="h6 text-gray-900">
+                Certificate of Enrollment (png, jpg, jpeg, pdf)
+              </h1>
+
+              <input
+                type="file"
+                name="coe_file"
+                class="form-control pt-3 pb-5"
+                autocomplete="off"
+                required
+              />
+              <p class="text-danger">{{error}}</p>
+              <div class="text-center mt-3">
+                <button
+                  type="submit"
+                  id="form-submit"
+                  name="form-submit"
+                  class="btn btn-primary btn-user btn-block"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%endblock%}

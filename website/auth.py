@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, url_for, redirect, request, session
 from pyrebase_config import user_auth
 from firebase_admin_config import admin_firestore as db
+from requests.exceptions import RequestException
 
 auth = Blueprint('auth', __name__, static_folder='static',
                  template_folder='templates',)
@@ -20,9 +21,10 @@ def login():
                 session['idToken'] = user['idToken']
 
             return redirect(url_for('views.index'))
+
         except Exception:
             error = 'Incorrect email or password.'
-            return render_template('login.html', error=error)
+        return render_template('login.html', error=error)
     else:
         if 'email' in session:
             return redirect(url_for('views.index'))

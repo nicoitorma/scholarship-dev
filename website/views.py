@@ -3,7 +3,7 @@ from firebase_admin_config import admin_firestore as db
 from pyrebase_config import bucket
 from firebase_admin import firestore
 import json
-from .models import Applicant, User, Beneficiaries
+from .models import Applicant, Student, Beneficiaries
 
 views = Blueprint('views', __name__, static_folder='static',
                   template_folder='templates')
@@ -71,7 +71,9 @@ def index():
                 'municipality': user_details.get('municipality', ''),
                 'scholarship': user_details.get('scholarship', ''),
                 'status': user_details.get('status', ''),
-                'allocation': user_details.get('allocation', '')
+                'allocation': user_details.get('allocation', ''),
+                'latest_coe': user_details.get('latest_coe', ''),
+                'latest_cog': user_details.get('latest_cog', '')
             }
             return render_template('student/index.html')
         elif user_role == ADMIN_ROLE:
@@ -206,8 +208,38 @@ def cog():
                 except Exception as e:
                     result = e
                 return render_template('student/cog.html', message=result)
+        
+        gwa = calculate_gwa(session['email'])
+        return render_template('student/cog.html', gwa=gwa)
+    return redirect(url_for('auth.login'))
 
-        return render_template('student/cog.html')
+
+@views.route('/certificate-of-enrollment', methods=['POST', 'GET'])
+def coe():
+    if 'email' in session:
+        email = session['email']
+        latest_coe = session['user_data'].get('latest_coe', '')
+
+        if request.method == 'POST':
+            result = ''
+            user_ref = db.collection('users').document(email)
+            coe_file = request.files.get('coe_file', None)
+            if coe_file and is_allowed(coe_file):
+                return render_template('student/coe.html', error='Certificate of Enrollment file format is not supported')
+
+            try:
+                # Storage
+                folder_name = f"{session['user_data'].get('municipality','')}/{email}"
+                coe_file.stream.seek(0)
+                coe_link = handle_file_upload(coe_file, folder_name)
+
+                user_ref.update({'latest_coe': coe_link})
+                result = 'Certificate of Enrollment updated.'
+            except Exception as e:
+                result = str(e)
+            return render_template('student/coe.html', message=result)
+
+        return render_template('student/coe.html', cog=latest_coe)
     return redirect(url_for('auth.login'))
 
 
@@ -217,8 +249,8 @@ def profile():
         user_ref = db.collection('users').document(session['email']).get()
         user_details = user_ref.to_dict()
 
-        user = User(user_details.get('name', ''), user_details.get('email', ''),
-                    user_details.get('municipality', ''), user_details.get('school', ''), user_details.get('program', ''), user_details.get('year_level', ''), user_details.get('scholarship', ''), user_details.get('status', ''))
+        user = Student(name=user_details.get('name', ''), email=user_details.get('email', ''),
+                       municipality=user_details.get('municipality', ''), school=user_details.get('school', ''), program=user_details.get('program', ''), year_level=user_details.get('year_level', ''), scholarship=user_details.get('scholarship', ''), status=user_details.get('status', ''))
         return render_template('profile.html', user=user)
     return redirect(url_for('auth.login'))
 
@@ -365,9 +397,9 @@ def payout():
 
 @views.route('/beneficiaries')
 def beneficiaries():
-    if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:        
+    if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:
         query = db.collection('users').get()
-        
+
         beneficiaries = []
         for doc in query:
             data = doc.to_dict()
@@ -376,10 +408,9 @@ def beneficiaries():
             # Count documents for each address
             if status == 'Beneficiary':
                 beneficiaries.append(Beneficiaries(
-                data.get('name',''), data.get('municipality',''), data.get('school',''), data.get('program',''), data.get('year_level'), data.get('scholarship','')))
+                    data.get('name', ''), data.get('municipality', ''), data.get('school', ''), data.get('program', ''), data.get('year_level'), data.get('scholarship', ''), data.get('latest_coe', ''), data.get('latest_cog', '')))
 
         # This code block is handling the processing of an action (accept or reject) for an applicant in
         # the admin panel.
         return render_template('admin/beneficiaries.html', list=beneficiaries)
     return redirect(url_for('auth.login'))
-    

@@ -35,7 +35,7 @@
 <div class="container-fluid">
   <!-- Heading -->
   <div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Update Certificate of Grades</h1>
+    <h1 class="h3 mb-0 text-gray-800">Certificate of Grades</h1>
   </div>
 
   <p class="text-center text-success">{{message}}</p>
@@ -44,123 +44,138 @@
     <!-- Content Row -->
     <div class="col mb-4">
       <div class="card shadow mb-4">
-        <div class="card-body p-0">
-          <div class="pt-5 pl-5 pr-5">
-            <form
-              method="POST"
-              action="/certificate-of-grades"
-              enctype="multipart/form-data"
-            >
-              <!-- Semester and School year-->
-              <div class="form-group row">
-                <!-- Semester -->
-                <div class="col col-sm-6 mb-3 mb-sm-0">
-                  <h1 class="h6 text-dark">Semester</h1>
-                  <select class="form-control" name="semester" required>
-                    <option value="default" disabled selected>Semester</option>
-                    <option value="1st">1st</option>
-                    <option value="2nd">2nd</option>
-                  </select>
-                </div>
-                <!-- School year -->
-                <div class="col col-sm-6 mb-3 mb-sm-0">
-                  <h1 class="h6 text-dark">School Year</h1>
-                  <select class="form-control" name="school_year" required>
-                    <option value="default" disabled selected>
-                      School year
-                    </option>
-                    <option value="2023-2024">2023-2024</option>
-                    <option value="2024-2025">2024-2025</option>
-                    <option value="2025-2026">2025-2026</option>
-                  </select>
-                </div>
-              </div>
-              <!-- End Sem and School Year -->
+        <div class="card-body p-5">
+          <h1 class="h5 text-warning">GWA Records</h1>
+          <table
+            class="table table-bordered mb-4"
+            id="dataTable"
+            width="100%"
+            cellspacing="0"
+          >
+            <tr>
+              <th><b>School Year</b></th>
+              <th><b>Semester</b></th>
+              <th><b>GWA</b></th>
+            </tr>
+            {%for item in gwa%}
+            <tr>
+              <td>{{item.school_year}}</td>
+              <td>{{item.semester}}</td>
+              <td>{{'%.2f'|format(item.gwa)}}</td>
+            </tr>
+            {%endfor%}
+          </table>
 
-              <!-- Table grades -->
-              <div class="form-group">
-                <table
-                  class="table table-bordered"
-                  width="100%"
-                  id="courseTable"
-                >
-                  <thead>
-                    <tr>
-                      <th>Course Code</th>
-                      <th>Units</th>
-                      <th>Final Grade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="form-group">
-                      <td>
-                        <input
-                          class="form-control"
-                          type="text"
-                          name="courseCode[]"
-                          placeholder="CS101"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          class="form-control"
-                          type="text"
-                          name="units[]"
-                          placeholder="3"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          class="form-control"
-                          type="text"
-                          name="finalGrade[]"
-                          placeholder="1.5"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+          <hr />
+          <h1 class="h4 text-warning mt-5">Update Certificate of Grades</h1>
+          <form
+            method="POST"
+            action="/certificate-of-grades"
+            enctype="multipart/form-data"
+          >
+            <!-- Semester and School year-->
+            <div class="form-group row">
+              <!-- Semester -->
+              <div class="col col-sm-6 mb-3 mb-sm-0">
+                <h1 class="h6 text-dark">Semester</h1>
+                <select class="form-control" name="semester" required>
+                  <option value="default" disabled selected>Semester</option>
+                  <option value="1st">1st</option>
+                  <option value="2nd">2nd</option>
+                </select>
               </div>
-              <!-- End table grades -->
-
-              <div class="form-group">
-                <div class="col-xl-2 col-lg-11 col-sm-2 mb-3 mb-sm-0">
-                  <input
-                    class="btn btn-primary"
-                    type="button"
-                    onclick="addRow()"
-                    value="Add field"
-                  />
-                </div>
+              <!-- School year -->
+              <div class="col col-sm-6 mb-3 mb-sm-0">
+                <h1 class="h6 text-dark">School Year</h1>
+                <select class="form-control" name="school_year" required>
+                  <option value="default" disabled selected>School year</option>
+                  <option value="2023-2024">2023-2024</option>
+                  <option value="2024-2025">2024-2025</option>
+                  <option value="2025-2026">2025-2026</option>
+                </select>
               </div>
+            </div>
+            <!-- End Sem and School Year -->
 
-              <!-- Separate row for the image -->
-              <div class="form-group">
-                <h1 class="mt-5 h6 text-gray-900">
-                  Certificate of Grades (png, jpg, jpeg, pdf)
-                </h1>
-                <h1 class="h6 text-info">For verification</h1>
+            <!-- Table grades -->
+            <div class="form-group">
+              <table class="table table-bordered" width="100%" id="courseTable">
+                <thead>
+                  <tr>
+                    <th>Course Code</th>
+                    <th>Units</th>
+                    <th>Final Grade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="form-group">
+                    <td>
+                      <input
+                        class="form-control"
+                        type="text"
+                        name="courseCode[]"
+                        placeholder="CS101"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        class="form-control"
+                        type="text"
+                        name="units[]"
+                        placeholder="3"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        class="form-control"
+                        type="text"
+                        name="finalGrade[]"
+                        placeholder="1.5"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- End table grades -->
+
+            <div class="form-group">
+              <div class="col-xl-2 col-lg-11 col-sm-2 mb-3 mb-sm-0">
                 <input
-                  type="file"
-                  name="cog"
-                  class="form-control pt-3 pb-5 mb-4"
-                  autocomplete="off"
-                  required
+                  class="btn btn-primary"
+                  type="button"
+                  onclick="addRow()"
+                  value="Add field"
                 />
               </div>
+            </div>
 
-              <div class="text-center mb-4">
-                <button
-                  type="submit"
-                  id="form-submit"
-                  name="form-submit"
-                  class="btn btn-primary btn-user btn-block"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
+            <!-- Separate row for the image -->
+            <div class="form-group">
+              <h1 class="mt-5 h6 text-gray-900">
+                Certificate of Grades (png, jpg, jpeg, pdf)
+              </h1>
+              <h1 class="h6 text-info">For verification</h1>
+              <input
+                type="file"
+                name="cog"
+                class="form-control pt-3 pb-5 mb-4"
+                autocomplete="off"
+                required
+              />
+            </div>
+
+            <div class="text-center mb-4">
+              <button
+                type="submit"
+                id="form-submit"
+                name="form-submit"
+                class="btn btn-info btn-user btn-block"
+              >
+                Submit
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

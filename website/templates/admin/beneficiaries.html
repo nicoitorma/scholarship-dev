@@ -27,8 +27,9 @@
                   <th>Municipality</th>
                   <th>School</th>
                   <th>Program</th>
-                  <th>Year level</th>
                   <th>Scholarship</th>
+                  <th>Certificate of Enrollment</th>
+                  <th>Certificate of Grades</th>
                 </tr>
               </thead>
 
@@ -39,9 +40,11 @@
                   <td>{{entry.municipality}}</td>
                   <td>{{entry.school}}</td>
                   <td>{{entry.program}}</td>
-                  <td>{{entry.year_level}}</td>
                   <td>{{entry.scholarship}}</td>
+                  <td><a href="{{entry.coe}}">Click to View</a></td>
+                  <td><a href="{{entry.cog}}">Click to View</a></td>
                 </tr>
+
                 {%endfor%}
               </tbody>
             </table>
