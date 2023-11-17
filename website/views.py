@@ -395,6 +395,27 @@ def payout():
     return redirect(url_for('auth.login'))
 
 
+@views.route('/release_payout', methods=['POST'])
+def release_payout():
+    if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:
+        # For scanning QR Code
+        if request.method == 'POST':
+            data = request.get_json()
+            qr_code_data = data.get('data')
+
+            print(qr_code_data)
+            # documents = db.collection('users').document(qr_code_data).get()
+            # user_details = documents.to_dict()
+            # if user_details:
+            #     gwa = calculate_gwa(qr_code_data)
+
+            #     user_details['gwa'] = gwa
+            #     return jsonify(user_details)
+            # return jsonify({'message': 'Beneficiary not found'}), 404
+        return render_template('admin/payout.html')
+    return redirect(url_for('auth.login'))
+
+
 @views.route('/beneficiaries')
 def beneficiaries():
     if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:

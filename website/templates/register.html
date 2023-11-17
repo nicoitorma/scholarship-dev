@@ -31,6 +31,20 @@
 
     <!-- Form Validation -->
     <script src="{{ url_for('static', filename='js/register.js')}}"></script>
+
+    <style>
+      .reveal-btn {
+        position: absolute;
+        right: 20px;
+        top: 55%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        color: #777;
+      }
+    </style>
   </head>
 
   <body class="bg-gradient-primary">
@@ -96,7 +110,12 @@
                         placeholder="Password"
                         onblur="validatePassword()"
                         required
-                      /><small id="passwordError" class="error-message"></small>
+                      />
+                      <button
+                        type="button"
+                        class="fas fa-eye fa-2x text-gray-300 reveal-btn"
+                        onclick="togglePassword('Password')"
+                      ></button>
                     </div>
                     <div class="col-sm-6">
                       <input
@@ -107,9 +126,22 @@
                         placeholder="Repeat Password"
                         onblur="validateConfirmPassword()"
                         required
-                      /><small id="confPassError" class="error-message"></small>
+                      /><button
+                        type="button"
+                        class="fas fa-eye fa-2x text-gray-300 reveal-btn"
+                        onclick="togglePassword('RepeatPassword')"
+                      ></button>
                     </div>
                   </div>
+                  <div class="form-group row">
+                    <div class="col-sm-6">
+                      <small id="passwordError" class="error-message"></small>
+                    </div>
+                    <div class="col-sm-6">
+                      <small id="confPassError" class="error-message"></small>
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     id="form-submit"
@@ -143,6 +175,17 @@
         </div>
       </div>
     </div>
+
+    <script>
+      function togglePassword(inputId) {
+        var passwordInput = document.getElementById(inputId);
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+        } else {
+          passwordInput.type = "password";
+        }
+      }
+    </script>
 
     <!-- Bootstrap core JavaScript-->
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>

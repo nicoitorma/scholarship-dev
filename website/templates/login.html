@@ -29,6 +29,19 @@
       href="{{ url_for('static', filename='css/main.css')}}"
     />
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
+    <style>
+      .reveal-btn {
+        position: absolute;
+        right: 80px;
+        top: 56%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        color: #777;
+      }
+    </style>
   </head>
 
   <body class="bg-gradient-primary">
@@ -51,7 +64,7 @@
                         Ako Bicol Partylist Scholarship System
                       </h1>
                     </div>
-                    <form class="user" , action="#" , method="post">
+                    <form class="user" , action="/login" , method="post">
                       <div class="form-group">
                         <input
                           type="email"
@@ -67,9 +80,13 @@
                           type="password"
                           name="password"
                           class="form-control form-control-user"
-                          id="exampleInputPassword"
+                          id="InputPassword"
                           placeholder="Password"
-                        />
+                        /><button
+                          type="button"
+                          class="fas fa-eye fa-2x text-gray-300 reveal-btn"
+                          onclick="togglePassword()"
+                        ></button>
                       </div>
 
                       <button
@@ -110,6 +127,15 @@
         .addEventListener("click", function () {
           window.location.href = "/forgot-password";
         });
+
+      function togglePassword() {
+        var passwordInput = document.getElementById("InputPassword");
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+        } else {
+          passwordInput.type = "password";
+        }
+      }
     </script>
 
     <!-- Bootstrap core JavaScript-->

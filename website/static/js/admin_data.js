@@ -107,83 +107,80 @@ document
   .getElementById("confirmActionButton")
   .addEventListener("click", performAction);
 
-  // Attach event listener to the Confirm button in the modal
+// Attach event listener to the Confirm button in the modal
 document
-.getElementById("confirmRemoveActionButton")
+  .getElementById("confirmRemoveActionButton")
   .addEventListener("click", removeBeneficiary);
 
-  function removeBeneficiary() {
-    // Make an AJAX request to the Flask route with the applicant ID and action
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/remove", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-  
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        console.log("Action performed successfully:", currentAction);
-  
-        // Close the confirmation modal
-        $("#confirmationRemoveModal").modal("hide");
-      }
-    };
-  
-    var data = JSON.stringify({
-      id: currentApplicantId,
-      email: applicantEmail,
-      action: currentAction,
-    });
-    xhr.send(data);
-  }
+function removeBeneficiary() {
+  // Make an AJAX request to the Flask route with the applicant ID and action
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "/remove", true);
+  xhr.setRequestHeader("Content-Type", "application/json");
 
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      console.log("Action performed successfully:", currentAction);
+
+      // Close the confirmation modal
+      $("#confirmationRemoveModal").modal("hide");
+    }
+  };
+
+  var data = JSON.stringify({
+    id: currentApplicantId,
+    email: applicantEmail,
+    action: currentAction,
+  });
+  xhr.send(data);
+}
 
 // For QR Code
-function domReady(fn) { 
-  if ( 
-      document.readyState === "complete" || 
-      document.readyState === "interactive"
-  ) { 
-      setTimeout(fn, 1000); 
-  } else { 
-      document.addEventListener("DOMContentLoaded", fn); 
-  } 
-} 
+function domReady(fn) {
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    setTimeout(fn, 1000);
+  } else {
+    document.addEventListener("DOMContentLoaded", fn);
+  }
+}
 
 domReady(function () {
   let htmlscanner;
 
   function startScanner() {
-    htmlscanner = new Html5QrcodeScanner(
-      "my-qr-reader",
-      { fps: 10, qrbos: 250 }
-    );
-    
+    htmlscanner = new Html5QrcodeScanner("my-qr-reader", {
+      fps: 10,
+      qrbos: 250,
+    });
+
     htmlscanner.render(onScanSuccess);
   }
 
   function onScanSuccess(decodeText, decodeResult) {
     // Remove event listeners to stop the scanner
     htmlscanner.pause();
-    
+
     // Send the QR code data to the Flask server
-    fetch('/payout', {
-      method: 'POST',
+    fetch("/payout", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ qrCodeData: decodeText }),
     })
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           return response.json();
-        }
-        else if (response.status === 404) {
-          throw new Error('Beneficiary not found!');
-        }
-        else {
-          throw new Error('Unexpected error');
+        } else if (response.status === 404) {
+          throw new Error("Beneficiary not found!");
+        } else {
+          throw new Error("Unexpected error");
         }
       })
-      .then(data => {
+      .then((data) => {
         const userDetails = document.getElementById("userDetails");
         userDetails.innerHTML = `
         <h1 class="h5 mb-4 font-weight-bold text-primary">Beneficiary Informations</h1>
@@ -202,10 +199,9 @@ domReady(function () {
         if (data.gwa == "Error: Document not found for email.") {
           const gwaTable = document.getElementById("gwaTable");
           gwaTable.innerHTML = ``;
-        }
-        else {
-      // Display GWA in the table
-      const gwaTable = document.getElementById("gwaTable");
+        } else {
+          // Display GWA in the table
+          const gwaTable = document.getElementById("gwaTable");
           gwaTable.innerHTML = `
         <h1 class="h5 mb-2 font-weight-bold text-warning">GWA Records</h1>
       <table class="table table-bordered"
@@ -217,14 +213,18 @@ domReady(function () {
           <th><b>Semester</b></th>
           <th><b>GWA</b></th>
         </tr>
-        ${data.gwa.map(item =>
-          `
+        ${data.gwa
+          .map(
+            (item) =>
+              `
           <tr>
             <td>${item.school_year}</td>
             <td>${item.semester}</td>
-            <td>${item.gwa !== null ? item.gwa.toFixed(2) : 'No record'}</td>
+            <td>${item.gwa !== null ? item.gwa.toFixed(2) : "No record"}</td>
           </tr>
-        `).join('')}
+        `
+          )
+          .join("")}
       </table>
     `;
         }
@@ -237,20 +237,19 @@ domReady(function () {
           const payoutButton = document.createElement("button");
           payoutButton.className = "btn btn-primary btn-warning";
           payoutButton.textContent = "Release Payout";
-
-          // Append the button to the container
+          payoutButton.addEventListener("click", function () {
+            releasePayout(data.email);
+          });
           payoutButtonContainer.appendChild(payoutButton);
-        } 
-        else {
+        } else {
           const payoutButtonContainer = document.getElementById("payoutButton");
           payoutButtonContainer.innerHTML = ``;
         }
         // Restart the scanner after a successful scan
         setTimeout(startScanner, 3000);
       })
-      .catch(error => {
-        if (error.message === 'Beneficiary not found!')
-        {
+      .catch((error) => {
+        if (error.message === "Beneficiary not found!") {
           const userDetails = document.getElementById("userDetails");
           userDetails.innerHTML = `
           <h1 class="h3 mb-4 font-weight-bold text-danger">Beneficiary not found!</h1>`;
@@ -258,9 +257,30 @@ domReady(function () {
 
         // Restart the scanner after an error
         setTimeout(startScanner, 3000);
-      })
+      });
   }
 
   // Start the initial scanner
   startScanner();
 });
+
+// Function to handle the button click event
+function releasePayout(email) {
+  fetch("/release_payout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify({ data: email }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // Handle the response from the backend if needed
+      console.log(data);
+    })
+    .catch((error) => {
+      // Handle errors
+      console.error("Error:", error);
+    });
+}
