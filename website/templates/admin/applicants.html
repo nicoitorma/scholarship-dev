@@ -51,12 +51,14 @@
                   <td>{{entry.school}}</td>
                   <td>{{entry.program}}</td>
                   <td>{{entry.year_level}}</td>
-                  <td><a href="{{entry.noa_link}}">Click to View</a></td>
-                  <td>
+                  <td class="text-center">
+                    <a href="{{entry.noa_link}}">Click to View</a>
+                  </td>
+                  <td class="text-center">
                     <a href="{{entry.coe_link}}">Click to View</a>
                   </td>
 
-                  <td>
+                  <td class="text-center">
                     <a
                       class="text-success"
                       onclick="showConfirmation('{{ entry.key }}', '{{entry.email}}', 'accept')"

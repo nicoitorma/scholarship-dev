@@ -39,44 +39,6 @@ function renderBarChart(divId, data) {
   });
 }
 
-function renderPieChart(divId, data) {
-  var ctx = document.getElementById(divId).getContext("2d");
-  var labels = Object.keys(data);
-  var values = Object.values(data);
-
-  var myPieChart = new Chart(ctx, {
-    type: "pie",
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          data: values,
-          backgroundColor: ["#F9F301", "#1cc88a"],
-          hoverBackgroundColor: ["#F9F301", "#1cc88a"],
-          hoverBorderColor: "rgba(234, 236, 244, 1)",
-        },
-      ],
-    },
-    options: {
-      maintainAspectRatio: false,
-      tooltips: {
-        backgroundColor: "rgb(255,255,255)",
-        bodyFontColor: "#858796",
-        borderColor: "#dddfeb",
-        borderWidth: 1,
-        xPadding: 15,
-        yPadding: 15,
-        displayColors: false,
-        caretPadding: 10,
-      },
-      legend: {
-        display: false,
-      },
-      cutoutPercentage: 80,
-    },
-  });
-}
-
 // Handle Accept and Reject click on Applicants table
 // script.js
 
@@ -99,6 +61,22 @@ function showConfirmation(applicantId, email, action) {
 
   // Open the confirmation modal
   $("#confirmationModal").modal("show");
+}
+
+function showRemoveConfirmation(email, action) {
+  applicantEmail = email;
+  currentAction = action;
+
+  // Update the text in the modal based on the action
+  document.getElementById(
+    "confirmationRemoveModalLabel"
+  ).innerHTML = `Confirm ${action}`;
+  document.getElementById(
+    "confirmationRemoveModalBody"
+  ).innerHTML = `Are you sure you want to ${action.toLowerCase()} this beneficiary?`;
+
+  // Open the confirmation modal
+  $("#confirmationRemoveModal").modal("show");
 }
 
 function performAction() {
@@ -128,6 +106,34 @@ function performAction() {
 document
   .getElementById("confirmActionButton")
   .addEventListener("click", performAction);
+
+  // Attach event listener to the Confirm button in the modal
+document
+.getElementById("confirmRemoveActionButton")
+  .addEventListener("click", removeBeneficiary);
+
+  function removeBeneficiary() {
+    // Make an AJAX request to the Flask route with the applicant ID and action
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/remove", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+  
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        console.log("Action performed successfully:", currentAction);
+  
+        // Close the confirmation modal
+        $("#confirmationRemoveModal").modal("hide");
+      }
+    };
+  
+    var data = JSON.stringify({
+      id: currentApplicantId,
+      email: applicantEmail,
+      action: currentAction,
+    });
+    xhr.send(data);
+  }
 
 
 // For QR Code

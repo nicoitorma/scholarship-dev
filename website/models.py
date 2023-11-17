@@ -25,7 +25,8 @@ class Student:
 
 
 class Beneficiaries:
-    def __init__(self, name, municipality, school, program, year_level, scholarship, coe, cog):
+    def __init__(self, email, name, municipality, school, program, year_level, scholarship, coe, cog):
+        self.email = email
         self.name = name
         self.municipality = municipality
         self.school = school

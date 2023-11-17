@@ -30,9 +30,6 @@
   <!-- Divider -->
   <hr class="sidebar-divider" />
 
-  <!-- Heading -->
-  <div class="sidebar-heading">Interface</div>
-
   <!-- Applicants Item for Admin -->
   {% if session['user_data']['role'] == 'admin'%}
   <li class="nav-item">
@@ -77,8 +74,8 @@
 
   <!--Application for scholarship item-->
   {% if session['user_data']['role'] == 'student' and
-  session['user_data']['status'] not in ['Pending', 'Beneficiary'] and
-  session['user_data']['scholarship']=='None'%}
+  session['user_data']['status'] not in ['Pending', 'Beneficiary', 'Removed']
+  and session['user_data']['scholarship']=='None'%}
   <!-- Nav Item - Apply for Scholarship -->
   <li class="nav-item">
     <a class="nav-link" href="/apply" id="apply">

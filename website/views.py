@@ -208,7 +208,7 @@ def cog():
                 except Exception as e:
                     result = e
                 return render_template('student/cog.html', message=result)
-        
+
         gwa = calculate_gwa(session['email'])
         return render_template('student/cog.html', gwa=gwa)
     return redirect(url_for('auth.login'))
@@ -407,10 +407,29 @@ def beneficiaries():
 
             # Count documents for each address
             if status == 'Beneficiary':
-                beneficiaries.append(Beneficiaries(
-                    data.get('name', ''), data.get('municipality', ''), data.get('school', ''), data.get('program', ''), data.get('year_level'), data.get('scholarship', ''), data.get('latest_coe', ''), data.get('latest_cog', '')))
+                beneficiaries.append(Beneficiaries(data.get('email', ''),
+                                                   data.get('name', ''), data.get('municipality', ''), data.get('school', ''), data.get('program', ''), data.get('year_level'), data.get('scholarship', ''), data.get('latest_coe', ''), data.get('latest_cog', '')))
 
         # This code block is handling the processing of an action (accept or reject) for an applicant in
         # the admin panel.
         return render_template('admin/beneficiaries.html', list=beneficiaries)
     return redirect(url_for('auth.login'))
+
+
+@views.route('/remove', methods=['POST'])
+def remove_beneficiary():
+    # This code block is handling the processing of an action (accept or reject) for an applicant in
+    # the admin panel.
+    if request.method == 'POST' and session['user_data'].get('role', '') == ADMIN_ROLE:
+        data = request.get_json()
+        applicant_email = data['email']
+        action = data['action']
+
+        user_ref = db.collection('users').document(applicant_email)
+        if action == 'remove':
+            user_ref.update(
+                {'scholarship': 'None', 'status': 'Removed', 'allocation': '0'})
+
+        return redirect(url_for('views.applicants'))
+    else:
+        return redirect(url_for('auth.login'))

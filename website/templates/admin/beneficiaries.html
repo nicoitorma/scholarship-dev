@@ -30,6 +30,7 @@
                   <th>Scholarship</th>
                   <th>Certificate of Enrollment</th>
                   <th>Certificate of Grades</th>
+                  <th>Action</th>
                 </tr>
               </thead>
 
@@ -43,6 +44,14 @@
                   <td>{{entry.scholarship}}</td>
                   <td><a href="{{entry.coe}}">Click to View</a></td>
                   <td><a href="{{entry.cog}}">Click to View</a></td>
+                  <td>
+                    <a
+                      class="text-danger"
+                      onclick="showRemoveConfirmation('{{entry.email}}', 'remove')"
+                    >
+                      Remove
+                    </a>
+                  </td>
                 </tr>
 
                 {%endfor%}
