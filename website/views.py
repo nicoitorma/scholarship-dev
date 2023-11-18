@@ -1,9 +1,9 @@
 from flask import Blueprint, session, render_template, redirect, url_for, request, jsonify
 from firebase_admin_config import admin_firestore as db
-from pyrebase_config import bucket
+from pyrebase_config import bucket, user_auth
 from firebase_admin import firestore
-import json
-from .models import Applicant, Student, Beneficiaries
+from .models import Applicant, Student, Beneficiaries, Receipts
+from datetime import datetime
 
 views = Blueprint('views', __name__, static_folder='static',
                   template_folder='templates')
@@ -56,6 +56,18 @@ def count_per_municipality():
     return municipality_count
 
 
+def get_transactions(email):
+    receipts_ref = db.collection('transactions').document(email).get()
+    receipts = []
+    if receipts_ref.exists:
+        doc = receipts_ref.to_dict()
+        for key, value in doc.items():
+            receipts.append(Receipts(
+                key, value['date'], value['amount'], value['released_by']))
+        return receipts
+    return 'No data available'
+
+
 @views.route('/')
 def index():
     if 'email' in session:
@@ -66,7 +78,8 @@ def index():
 
         if user_role == STUDENT_ROLE:
             session['user_data'] = {
-                'name': user_details.get('name'),
+                'fName': user_details.get('fName', ''),
+                'lName': user_details.get('lName', ''),
                 'role': user_role,
                 'municipality': user_details.get('municipality', ''),
                 'scholarship': user_details.get('scholarship', ''),
@@ -75,10 +88,11 @@ def index():
                 'latest_coe': user_details.get('latest_coe', ''),
                 'latest_cog': user_details.get('latest_cog', '')
             }
-            return render_template('student/index.html')
+            return render_template('student/index.html', receipts=get_transactions(email))
         elif user_role == ADMIN_ROLE:
             session['user_data'] = {
-                'name': user_details.get('name', ''),
+                'fName': user_details.get('fName', ''),
+                'lName': user_details.get('lName', ''),
                 'role': user_role,
             }
             return admin()
@@ -105,21 +119,25 @@ def apply():
     if 'email' in session and session['user_data'].get('status', '') == 'None':
         if request.method == 'POST':
 
-            f_name = request.form.get('fName', '')
-            l_name = request.form.get('lName', '')
             municipality = request.form.get('municipality', '')
             school = request.form.get('school', '')
             program = request.form.get('program', '')
             year_level = request.form.get('yearlevel', '')
             file1 = request.files.get('file1', None)
             file2 = request.files.get('file2', None)
+            file3 = request.files.get('file3', None)
             email = session.get('email', '')
+            fName = session['user_data'].get('fName', '')
+            lName = session['user_data'].get('lName', '')
+
             key = get_applicants_count()
 
             if file1 and is_allowed(file1):
                 return render_template('student/apply.html', error='Notice of Award file format is not supported')
             if file2 and is_allowed(file2):
                 return render_template('student/apply.html', error='Certificate of Enrollment file format is not supported')
+            if file3 and is_allowed(file3):
+                return render_template('student/apply.html', error='Financial file format is not supported')
             try:
                 # db connections
                 applicants_ref = db.collection('admin').document('applicants')
@@ -129,20 +147,24 @@ def apply():
                 folder_name = f"{municipality}/{email}"
                 file1.stream.seek(0)
                 file2.stream.seek(0)
+                file3.stream.seek(0)
                 file1_link = handle_file_upload(file1, folder_name)
                 file2_link = handle_file_upload(file2, folder_name)
+                file3_link = handle_file_upload(file3, folder_name)
 
                 # Store user details in Firestore
                 applicants_ref.update({
                     str(key): {
-                        'name': f"{f_name} {l_name}",
+                        'name': f"{fName} {lName}",
                         'municipality': municipality,
                         'school': school,
                         'program': program,
                         'year_level': year_level,
                         'noa_link': file1_link,
                         'coe_link': file2_link,
-                        'email': email
+                        'financial_link': file3_link,
+                        'email': email,
+
                     }
                 })
 
@@ -243,25 +265,26 @@ def coe():
     return redirect(url_for('auth.login'))
 
 
+def get_user_profile(email):
+    user_ref = db.collection('users').document(email).get()
+    user_details = user_ref.to_dict()
+
+    user = Student(fName=user_details.get('fName', ''), lName=user_details.get('lName', ''), email=user_details.get('email', ''),
+                   municipality=user_details.get('municipality', ''), school=user_details.get('school', ''), program=user_details.get('program', ''), year_level=user_details.get('year_level', ''), scholarship=user_details.get('scholarship', ''), status=user_details.get('status', ''))
+    return user
+
+
 @views.route('/profile')
 def profile():
     if 'email' in session:
-        user_ref = db.collection('users').document(session['email']).get()
-        user_details = user_ref.to_dict()
-
-        user = Student(name=user_details.get('name', ''), email=user_details.get('email', ''),
-                       municipality=user_details.get('municipality', ''), school=user_details.get('school', ''), program=user_details.get('program', ''), year_level=user_details.get('year_level', ''), scholarship=user_details.get('scholarship', ''), status=user_details.get('status', ''))
-        return render_template('profile.html', user=user)
+        return render_template('profile.html', user=get_user_profile(session['email']))
     return redirect(url_for('auth.login'))
 
 
 # FOR ADMIN
 @views.route('/admin')
 def admin():
-    doc2_ref = db.collection('admin').document('grantees')
-    doc2_data = doc2_ref.get().to_dict()
-
-    return render_template('admin/index.html', count_beneficiaries=count_beneficiaries(), appli_count=get_applicants_count(), data1=count_per_municipality(), data2=json.dumps(doc2_data))
+    return render_template('admin/index.html', count_beneficiaries=count_beneficiaries(), appli_count=get_applicants_count(), data1=count_per_municipality())
 
 
 @views.route('/applicants')
@@ -279,7 +302,7 @@ def applicants():
         doc_data = documents.to_dict()
         for key, value in doc_data.items():
             applicants.append(Applicant(
-                key, value['email'], value['name'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link'], value['municipality']))
+                key, value['email'], value['name'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link'], value['financial_link'], value['municipality']))
 
     # This code block is handling the processing of an action (accept or reject) for an applicant in
     # the admin panel.
@@ -296,16 +319,24 @@ def process_action():
         applicant_id = data['id']
         applicant_email = data['email']
         action = data['action']
+        scholar_type = data['scholarship_type']
 
         applicants_ref = db.collection('admin').document('applicants')
         user_ref = db.collection('users').document(applicant_email)
         beneficiaries_ref = db.collection(
             'beneficiaries_cog').document(applicant_email)
         beneficiaries_ref.set({})
+        transactions_ref = db.collection(
+            'transactions').document(applicant_email)
+        transactions_ref.set({})
 
         if action == 'accept':
-            user_ref.update(
-                {'scholarship': 'StuFAP', 'status': 'Beneficiary', 'allocation': '7,750'})
+            if scholar_type == 'Full Merit':
+                user_ref.update(
+                    {'scholarship': scholar_type, 'status': 'Beneficiary', 'allocation': '30,000'})
+            elif scholar_type == 'Half Merit':
+                user_ref.update(
+                    {'scholarship': scholar_type, 'status': 'Beneficiary', 'allocation': '15,000'})
         else:
             user_ref.update({'status': 'Rejected'})
 
@@ -395,22 +426,37 @@ def payout():
     return redirect(url_for('auth.login'))
 
 
+def generate_ref_no(current_date, count):
+    formatted_date = current_date.strftime("%m%d%y")
+    return f'AKBINV{formatted_date}{count}'
+
+
 @views.route('/release_payout', methods=['POST'])
 def release_payout():
     if 'email' in session and session['user_data'].get('role', '') == ADMIN_ROLE:
-        # For scanning QR Code
         if request.method == 'POST':
             data = request.get_json()
             qr_code_data = data.get('data')
+            current_datetime = datetime.now()
 
-            print(qr_code_data)
-            # documents = db.collection('users').document(qr_code_data).get()
-            # user_details = documents.to_dict()
-            # if user_details:
-            #     gwa = calculate_gwa(qr_code_data)
+            receipt_ref = db.collection('admin').document('receipt')
+            content = receipt_ref.get().to_dict()
+            count = content.get('count')
+            key = generate_ref_no(current_datetime, count)
 
-            #     user_details['gwa'] = gwa
-            #     return jsonify(user_details)
+            transactions_ref = db.collection(
+                'transactions').document(qr_code_data)
+
+            display_date = current_datetime.strftime("%B %d, %Y")
+            admin_name = f"{session['user_data'].get('fName')} {session['user_data'].get('lName')}"
+
+            transactions_ref.update({
+                str(key): {'date': str(display_date),
+                           'amount': '30,000',
+                           'released_by': str(admin_name)}})
+            # Update count
+            receipt_ref.update({'count': count+1})
+
             # return jsonify({'message': 'Beneficiary not found'}), 404
         return render_template('admin/payout.html')
     return redirect(url_for('auth.login'))
@@ -429,7 +475,7 @@ def beneficiaries():
             # Count documents for each address
             if status == 'Beneficiary':
                 beneficiaries.append(Beneficiaries(data.get('email', ''),
-                                                   data.get('name', ''), data.get('municipality', ''), data.get('school', ''), data.get('program', ''), data.get('year_level'), data.get('scholarship', ''), data.get('latest_coe', ''), data.get('latest_cog', '')))
+                                                   data.get('fName', ''), data.get('lName', ''), data.get('municipality', ''), data.get('school', ''), data.get('program', ''), data.get('year_level'), data.get('scholarship', ''), data.get('latest_coe', ''), data.get('latest_cog', '')))
 
         # This code block is handling the processing of an action (accept or reject) for an applicant in
         # the admin panel.
@@ -454,3 +500,10 @@ def remove_beneficiary():
         return redirect(url_for('views.applicants'))
     else:
         return redirect(url_for('auth.login'))
+
+
+@views.route('/beneficiaries/transactions/<email>')
+def transactions(email):
+    if 'email' in session:
+        return render_template('admin/transactions.html', user=get_user_profile(email), receipts=get_transactions(email))
+    return redirect(url_for('auth.login'))

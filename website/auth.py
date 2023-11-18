@@ -47,7 +47,8 @@ def register():
 
             # create student details
             user_data = {
-                'name': f_name + ' ' + l_name,
+                'fName': f_name,
+                'lName': l_name,
                 'role': 'student',
                 'scholarship': 'None',
                 'status': 'None',

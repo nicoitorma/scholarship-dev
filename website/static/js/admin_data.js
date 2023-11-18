@@ -41,7 +41,6 @@ function renderBarChart(divId, data) {
 
 // Handle Accept and Reject click on Applicants table
 // script.js
-
 var currentApplicantId;
 var currentAction;
 var applicantEmail;
@@ -80,6 +79,14 @@ function showRemoveConfirmation(email, action) {
 }
 
 function performAction() {
+  var scholarshipType = document.querySelector('[name="scholar_type"]').value;
+
+  if (scholarshipType === "default") {
+    // Display an error message or take appropriate action
+    alert("Please select a valid Scholarship Type.");
+    return;
+  }
+
   // Make an AJAX request to the Flask route with the applicant ID and action
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "/process", true);
@@ -98,6 +105,7 @@ function performAction() {
     id: currentApplicantId,
     email: applicantEmail,
     action: currentAction,
+    scholarship_type: scholarshipType,
   });
   xhr.send(data);
 }
@@ -147,140 +155,175 @@ function domReady(fn) {
   }
 }
 
+var currentEmail;
+
 domReady(function () {
+  const scannerConfig = {
+    fps: 10,
+    qrbos: 250,
+  };
+
+  const userDetails = document.getElementById("userDetails");
+  const gwaTable = document.getElementById("gwaTable");
+  const payoutButtonContainer = document.getElementById("payoutButton");
+
   let htmlscanner;
 
   function startScanner() {
-    htmlscanner = new Html5QrcodeScanner("my-qr-reader", {
-      fps: 10,
-      qrbos: 250,
-    });
-
+    htmlscanner = new Html5QrcodeScanner("my-qr-reader", scannerConfig);
     htmlscanner.render(onScanSuccess);
   }
 
-  function onScanSuccess(decodeText, decodeResult) {
-    // Remove event listeners to stop the scanner
-    htmlscanner.pause();
-
-    // Send the QR code data to the Flask server
-    fetch("/payout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ qrCodeData: decodeText }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else if (response.status === 404) {
-          throw new Error("Beneficiary not found!");
-        } else {
-          throw new Error("Unexpected error");
-        }
-      })
-      .then((data) => {
-        const userDetails = document.getElementById("userDetails");
-        userDetails.innerHTML = `
-        <h1 class="h5 mb-4 font-weight-bold text-primary">Beneficiary Informations</h1>
-        <h1 class="h6 text-dark" ><b>Name</b>: ${data.name}</h5>
-        <h1 class="h6 text-dark" ><b>Email</b>: ${data.email}</h1>
-        <h1 class="h6 text-dark" ><b>Municipality</b>: ${data.municipality}</h1>
-        <hr />
-        <h1 class="h6 text-dark" ><b>School</b>: ${data.school}</h1>
-        <h1 class="h6 text-dark" ><b>Program</b>: ${data.program}</h1>
-        <h1 class="h6 text-dark" ><b>Year level</b>: ${data.year_level}</h1>
-        <hr/>
-        <h1 class="h6 text-dark" ><b>Scholarship</b>: ${data.scholarship}</h>
-        <h1 class="h6 text-dark" ><b>Scholarship status</b>: ${data.status}</h1>
-        `;
-
-        if (data.gwa == "Error: Document not found for email.") {
-          const gwaTable = document.getElementById("gwaTable");
-          gwaTable.innerHTML = ``;
-        } else {
-          // Display GWA in the table
-          const gwaTable = document.getElementById("gwaTable");
-          gwaTable.innerHTML = `
-        <h1 class="h5 mb-2 font-weight-bold text-warning">GWA Records</h1>
-      <table class="table table-bordered"
-      id="dataTable"
-      width="100%"
-      cellspacing="0">
-        <tr>
-          <th><b>School Year</b></th>
-          <th><b>Semester</b></th>
-          <th><b>GWA</b></th>
-        </tr>
-        ${data.gwa
-          .map(
-            (item) =>
-              `
-          <tr>
-            <td>${item.school_year}</td>
-            <td>${item.semester}</td>
-            <td>${item.gwa !== null ? item.gwa.toFixed(2) : "No record"}</td>
-          </tr>
-        `
-          )
-          .join("")}
-      </table>
-    `;
-        }
-
-        // Check if the status is Beneficiary
-        if (data.status === "Beneficiary") {
-          const payoutButtonContainer = document.getElementById("payoutButton");
-
-          // Create a button element
-          const payoutButton = document.createElement("button");
-          payoutButton.className = "btn btn-primary btn-warning";
-          payoutButton.textContent = "Release Payout";
-          payoutButton.addEventListener("click", function () {
-            releasePayout(data.email);
-          });
-          payoutButtonContainer.appendChild(payoutButton);
-        } else {
-          const payoutButtonContainer = document.getElementById("payoutButton");
-          payoutButtonContainer.innerHTML = ``;
-        }
-        // Restart the scanner after a successful scan
-        setTimeout(startScanner, 3000);
-      })
-      .catch((error) => {
-        if (error.message === "Beneficiary not found!") {
-          const userDetails = document.getElementById("userDetails");
-          userDetails.innerHTML = `
-          <h1 class="h3 mb-4 font-weight-bold text-danger">Beneficiary not found!</h1>`;
-        }
-
-        // Restart the scanner after an error
-        setTimeout(startScanner, 3000);
-      });
+  function onScanSuccess(decodeText) {
+    // htmlscanner.pause();
+    fetchDataAndDisplayDetails(decodeText);
   }
 
-  // Start the initial scanner
+  async function fetchDataAndDisplayDetails(decodeText) {
+    try {
+      const response = await fetch("/payout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ qrCodeData: decodeText }),
+      });
+
+      if (!response.ok) {
+        throw new Error(response.status === 404 ? "Beneficiary not found!" : "Unexpected error");
+      }
+
+      const data = await response.json();
+      displayBeneficiaryDetails(data);
+
+      setTimeout(startScanner, 3000);
+    } catch (error) {
+      console.log(error);
+      handleFetchError(error);
+    }
+  }
+
+  function displayBeneficiaryDetails(data) {
+    currentEmail = data.email;
+    createReleasePayoutModal(data.fName, data.lName, data.allocation);
+    userDetails.innerHTML = `
+          <h1 class="h5 mb-4 font-weight-bold text-primary">Beneficiary Informations</h1>
+          <h1 class="h6 text-dark" ><b>Name</b>: ${data.fName} ${data.lName}</h5>
+          <h1 class="h6 text-dark" ><b>Email</b>: ${data.email}</h1>
+          <h1 class="h6 text-dark" ><b>Municipality</b>: ${data.municipality}</h1>
+          <hr />
+          <h1 class="h6 text-dark" ><b>School</b>: ${data.school}</h1>
+          <h1 class="h6 text-dark" ><b>Program</b>: ${data.program}</h1>
+          <h1 class="h6 text-dark" ><b>Year level</b>: ${data.year_level}</h1>
+          <hr/>
+          <h1 class="h6 text-dark" ><b>Scholarship</b>: ${data.scholarship}</h>
+          <h1 class="h6 text-dark" ><b>Scholarship status</b>: ${data.status}</h1>
+          <h1 class="h6 text-dark" ><b>Allocation per semester</b>: ${data.allocation}</h1>
+          `;
+
+    if (data.gwa === "Error: Document not found for email.") {
+      gwaTable.innerHTML = "";
+    } else {
+      gwaTable.innerHTML = `
+              <h1 class="h5 mb-2 font-weight-bold text-warning">GWA Records</h1>
+            <table class="table table-bordered"
+            id="dataTable"
+            width="100%"
+            cellspacing="0">
+              <tr>
+                <th><b>School Year</b></th>
+                <th><b>Semester</b></th>
+                <th><b>GWA</b></th>
+              </tr>
+              ${data.gwa
+                    .map(
+                      (item) =>
+                        `
+                <tr>
+                  <td>${item.school_year}</td>
+                  <td>${item.semester}</td>
+                  <td>${item.gwa !== null ? item.gwa.toFixed(2) : "No record"}</td>
+                </tr>
+              `
+                    )
+                    .join("")}
+            </table>
+          
+      `;
+    }
+
+    // Check if the status is Beneficiary
+    if (data.status === "Beneficiary") {
+      payoutButtonContainer.innerHTML = `<button class="btn btn-primary btn-warning" id="releasePayout">Release Payout</button>`;
+    } else {
+      payoutButtonContainer.innerHTML = "";
+    }
+  }
+
+  function handleFetchError(error) {
+    userDetails.innerHTML = `<h1 class="h3 mb-4 font-weight-bold text-danger">${error.message}</h1>`;
+    setTimeout(startScanner, 3000);
+  }
+
+  // Event delegation for the payout button
+  payoutButtonContainer.addEventListener("click", function (event) {
+    if (event.target.id === "releasePayout") {
+      releasePayout();
+    }
+  });
+
   startScanner();
+  
 });
 
-// Function to handle the button click event
-function releasePayout(email) {
-  fetch("/release_payout", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+function releasePayout() {
+  $("#myModal").modal("show");
+}
 
-    body: JSON.stringify({ data: email }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      // Handle the response from the backend if needed
+function createReleasePayoutModal(fName, lName, amount) {
+  const modalContainer = document.createElement("div");
+  modalContainer.className = "modal fade";
+  modalContainer.id = "myModal";
+  modalContainer.innerHTML = `
+          <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Release Payout</h5>
+                      <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                      </button>
+                  </div>
+                  <div class="modal-body">
+                      <p>Are you sure you want to release the payout for <b class="text-info">${fName} ${lName}</b> amounting to <b class="text-info">${amount}</b>?</p>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-primary" id="confirmRelease">Release</button>
+                  </div>
+              </div>
+          </div>
+      `;
+
+  document.body.appendChild(modalContainer);
+
+  // Event listener for the "Release" button inside the modal
+  document.getElementById("confirmRelease").addEventListener("click", async function () {
+    try {
+      const response = await fetch("/release_payout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: currentEmail }),
+      });
+
+      const data = await response.json();
       console.log(data);
-    })
-    .catch((error) => {
-      // Handle errors
-      console.error("Error:", error);
-    });
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+
+    // Close the modal
+    $("#myModal").modal("hide");
+  });
 }

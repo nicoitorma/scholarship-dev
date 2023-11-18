@@ -1,0 +1,86 @@
+{%extends 'base.html'%} {%block title%} Transaction History {%endblock%} {%block
+content%}
+<div class="container-fluid">
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Beneficiary Information</h1>
+  </div>
+  <!-- End Page Heading -->
+  <div class="row">
+    <div class="col mb-4">
+      <div class="card shadow mb-3">
+        <div class="card-header py-3">
+          <h1 class="h6 m-0 font-weight-bold text-primary">Profile</h1>
+        </div>
+        <div class="card-body">
+          <div class="col-xl-8 col-lg-7 p-3">
+            {%if user.fName and user.lName%}
+            <h5 class="text-dark">Name: {{user.fName}} {{user.lName}}</h5>
+            {%endif%} {%if user.email%}
+            <h5 class="text-dark">Email: {{user.email}}</h5>
+            {%endif%} {%if user.municipality%}
+            <h5 class="text-dark">Municipality: {{user.municipality}}</h5>
+            {%endif%} {%if user.school%}
+            <hr />
+            <h5 class="text-dark">School: {{user.school}}</h5>
+            {%endif%} {%if user.program%}
+            <h5 class="text-dark">Program: {{user.program}}</h5>
+            {%endif%} {%if user.year_level%}
+            <h5 class="text-dark">Year level: {{user.year_level}}</h5>
+            {%endif%}
+            <hr />
+            {%if user.status%}
+            <h5 class="text-dark">Status: {{user.status}}</h5>
+            {%endif%} {%if user.scholarship%}
+            <h5 class="text-dark">Scholarship: {{user.scholarship}}</h5>
+            {%endif%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Content Column -->
+    <div class="col mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h1 class="h6 m-0 font-weight-bold text-primary">
+            Transaction History
+          </h1>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table
+              class="table table-bordered"
+              id="dataTable"
+              width="100%"
+              cellspacing="0"
+            >
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Released by</th>
+                  <th>Reference Number</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {%for entry in receipts%}
+                <tr>
+                  <td>{{entry.date}}</td>
+                  <td>{{entry.amount}}</td>
+                  <td>{{entry.released_by}}</td>
+                  <td>{{entry.key}}</td>
+                </tr>
+                {%endfor%}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%endblock%}

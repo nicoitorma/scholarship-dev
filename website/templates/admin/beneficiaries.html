@@ -37,14 +37,24 @@
               <tbody>
                 {%for entry in list%}
                 <tr>
-                  <td>{{entry.name}}</td>
+                  <td>
+                    <a
+                      href="{{ url_for('views.transactions', email=entry.email) }}"
+                    >
+                      {{ entry.f_name + ' ' + entry.l_name }}
+                    </a>
+                  </td>
                   <td>{{entry.municipality}}</td>
                   <td>{{entry.school}}</td>
                   <td>{{entry.program}}</td>
                   <td>{{entry.scholarship}}</td>
-                  <td><a href="{{entry.coe}}">Click to View</a></td>
-                  <td><a href="{{entry.cog}}">Click to View</a></td>
-                  <td>
+                  <td class="text-center">
+                    <a href="{{entry.coe}}">Click to View</a>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{entry.cog}}">Click to View</a>
+                  </td>
+                  <td class="text-center">
                     <a
                       class="text-danger"
                       onclick="showRemoveConfirmation('{{entry.email}}', 'remove')"
@@ -53,7 +63,6 @@
                     </a>
                   </td>
                 </tr>
-
                 {%endfor%}
               </tbody>
             </table>

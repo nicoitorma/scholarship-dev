@@ -38,24 +38,24 @@ block sidebar_script %}
               <div class="form-group row">
                 <div class="col-sm-6 mb-3 mb-sm-0">
                   <input
+                    readonly
                     type="text"
                     class="form-control"
                     name="fName"
+                    value="{{ session['user_data'].get('fName', '') }}"
                     id="FirstName"
-                    placeholder="First Name"
-                    onblur="validateFirstName()"
                     required
                   />
                   <small id="fNameError" class="error-message"></small>
                 </div>
                 <div class="col-sm-6 mb-3 mb-sm-0">
                   <input
+                    readonly
                     type="text"
                     name="lName"
                     class="form-control"
                     id="LastName"
-                    placeholder="Last Name"
-                    onblur="validateLastName()"
+                    value="{{ session['user_data'].get('lName', '') }}"
                     required
                   />
                   <small id="lNameError" class="error-message"></small>
@@ -114,6 +114,8 @@ block sidebar_script %}
                     class="form-control"
                     id="yearlevel"
                     placeholder="Year level"
+                    min="1"
+                    max="4"
                     required
                   /><small id="confPassError" class="error-message"></small>
                 </div>
@@ -146,6 +148,41 @@ block sidebar_script %}
                 <input
                   type="file"
                   name="file2"
+                  class="form-control pt-3 pb-5"
+                  autocomplete="off"
+                  required
+                />
+
+                <p class="text-danger">{{error}}</p>
+
+                <!--Financial-->
+                <hr class="mt-5" />
+                <h1 class="h6 text-gray-900">
+                  Financial proof (any of the following:)
+                </h1>
+                <ul>
+                  <li>
+                    Latest Income Tax Return (ITR) of parents or guardian;
+                  </li>
+                  <li>
+                    Certificate of Tax Exemption from the Bureau of Internal
+                    Revenue (BIR);
+                  </li>
+                  <li>
+                    Certificate of Indigence either from their Barangay or
+                    Department of Social Welfare and Development (DSWD);
+                  </li>
+                  <li>Case Study Report from DSWD; or</li>
+                  <li>
+                    Latest copy of contract or proof of income may be considered
+                    for children of Overseas Filipino Workers (OFW) and
+                    seafarers.
+                  </li>
+                </ul>
+
+                <input
+                  type="file"
+                  name="file3"
                   class="form-control pt-3 pb-5"
                   autocomplete="off"
                   required

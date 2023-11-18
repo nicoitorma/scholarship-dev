@@ -1,5 +1,5 @@
 class Applicant:
-    def __init__(self, key, email, name, school, program, year_level, noa_link, coe_link, municipality=None):
+    def __init__(self, key, email, name, school, program, year_level, noa_link, coe_link, financial_link, municipality=None):
         self.email = email
         self.key = key
         self.name = name
@@ -9,11 +9,13 @@ class Applicant:
         self.year_level = year_level
         self.noa_link = noa_link
         self.coe_link = coe_link
+        self.financial_link = financial_link
 
 
 class Student:
-    def __init__(self, name=None, role=None, email=None, municipality=None, school=None, program=None, year_level=None, scholarship=None, status=None):
-        self.name = name
+    def __init__(self, fName=None, lName=None, role=None, email=None, municipality=None, school=None, program=None, year_level=None, scholarship=None, status=None):
+        self.fName = fName
+        self.lName = lName
         self.role = role
         self.email = email
         self.municipality = municipality
@@ -25,9 +27,10 @@ class Student:
 
 
 class Beneficiaries:
-    def __init__(self, email, name, municipality, school, program, year_level, scholarship, coe, cog):
+    def __init__(self, email, f_name, l_name, municipality, school, program, year_level, scholarship, coe, cog):
         self.email = email
-        self.name = name
+        self.f_name = f_name
+        self.l_name = l_name
         self.municipality = municipality
         self.school = school
         self.program = program
@@ -35,3 +38,11 @@ class Beneficiaries:
         self.scholarship = scholarship
         self.coe = coe
         self.cog = cog
+
+
+class Receipts:
+    def __init__(self, key, date, amount, release_by):
+        self.key = key
+        self.date = date
+        self.amount = amount
+        self.released_by = release_by
