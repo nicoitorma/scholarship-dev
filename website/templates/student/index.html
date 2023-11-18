@@ -1,7 +1,6 @@
 {%extends "base.html"%} {%block title%}Student Dashboard{%endblock%} {% block
 sidebar_script %}
 <script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
-<script src="{{ url_for('static', filename='js/data_tables.js')}}"></script>
 {% endblock %} {%block content%} {% if
 session['user_data']['scholarship']=='None' and session['user_data']['status']
 == 'None'%}
