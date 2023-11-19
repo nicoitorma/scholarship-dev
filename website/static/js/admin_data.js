@@ -62,6 +62,24 @@ function showConfirmation(applicantId, email, action) {
   $("#confirmationModal").modal("show");
 }
 
+
+function showAdminConfirmation(email, action) {
+  adminEmail = email;
+  adminAction = action;
+
+  // Update the text in the modal based on the action
+  document.getElementById(
+    "confirmAdminModalLabel"
+  ).innerHTML = `Confirm ${action}`;
+  document.getElementById(
+    "confirmAdminModalBody"
+  ).innerHTML = `Are you sure you want to ${action.toLowerCase()} this admin?`;
+
+  // Open the confirmation modal
+  $("#confirmAdminModal").modal("show");
+}
+
+// For removing beneficiary
 function showRemoveConfirmation(email, action) {
   applicantEmail = email;
   currentAction = action;
@@ -78,6 +96,7 @@ function showRemoveConfirmation(email, action) {
   $("#confirmationRemoveModal").modal("show");
 }
 
+// For accepting or rejecting appplicant
 function performAction() {
   var scholarshipType = document.querySelector('[name="scholar_type"]').value;
 
@@ -110,15 +129,41 @@ function performAction() {
   xhr.send(data);
 }
 
-// Attach event listener to the Confirm button in the modal
+// Attach event listener to the Confirm Applicant button in the modal
 document
   .getElementById("confirmActionButton")
   .addEventListener("click", performAction);
 
-// Attach event listener to the Confirm button in the modal
+// Attach event listener to the Confirm Beneficiary button in the modal
 document
   .getElementById("confirmRemoveActionButton")
   .addEventListener("click", removeBeneficiary);
+
+document
+  .getElementById("confirmAdminButton")
+  .addEventListener("click", confirmAdmin); 
+
+// For confirming or rejecting admin
+function confirmAdmin() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "/users", true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      console.log("Action performed successfully:", currentAction);
+
+      // Close the confirmation modal
+      $("#confirmAdminModal").modal("hide");
+    }
+  }
+
+  var data = JSON.stringify({
+    email: adminEmail,
+    action: adminAction,
+  });
+  xhr.send(data);
+}
 
 function removeBeneficiary() {
   // Make an AJAX request to the Flask route with the applicant ID and action
@@ -175,7 +220,7 @@ domReady(function () {
   }
 
   function onScanSuccess(decodeText) {
-    // htmlscanner.pause();
+    htmlscanner.pause();
     fetchDataAndDisplayDetails(decodeText);
   }
 

@@ -53,16 +53,23 @@
         <div class="card-body p-0">
           <!-- Nested Row within Card Body -->
           <div class="row">
+            <!-- Image -->
             <div
               class="ml-5 col-lg-4 d-none d-lg-block bg-register-image"
             ></div>
+            <!-- End Image -->
+
             <div class="col-lg-7">
               <div class="p-5">
                 <div class="text-center">
                   <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
                 </div>
+
+                <!-- Form -->
                 <form class="user" action="#" , method="post">
+                  <!-- Name -->
                   <div class="form-group row">
+                    <!-- First Name -->
                     <div class="col-sm-6 mb-3 mb-sm-0 border-warning">
                       <input
                         type="text"
@@ -75,6 +82,7 @@
                       />
                       <small id="fNameError" class="error-message"></small>
                     </div>
+                    <!-- Last Name -->
                     <div class="col-sm-6">
                       <input
                         type="text"
@@ -88,6 +96,9 @@
                       <small id="lNameError" class="error-message"></small>
                     </div>
                   </div>
+                  <!-- End Name -->
+
+                  <!-- Email Address-->
                   <div class="form-group">
                     <input
                       type="email"
@@ -100,7 +111,11 @@
                     />
                     <small id="emailError" class="error-message"></small>
                   </div>
+                  <!-- End Email Address -->
+
+                  <!-- Password -->
                   <div class="form-group row">
+                    <!-- Password1 -->
                     <div class="col-sm-6 mb-3 mb-sm-0">
                       <input
                         type="password"
@@ -117,6 +132,9 @@
                         onclick="togglePassword('Password')"
                       ></button>
                     </div>
+                    <!-- End Password1 -->
+
+                    <!-- Confirm Password -->
                     <div class="col-sm-6">
                       <input
                         type="password"
@@ -132,7 +150,37 @@
                         onclick="togglePassword('RepeatPassword')"
                       ></button>
                     </div>
+                    <!-- End Confirm Password -->
                   </div>
+                  <!-- End Password -->
+
+                  <!-- User Role -->
+                  <div class="form-group row">
+                    <div class="col text-center text-gray-900">
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="group1"
+                          class="checkbox-group"
+                          value="admin"
+                        />
+                        Admin
+                      </label>
+                    </div>
+                    <div class="col text-center text-gray-900">
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="group1"
+                          class="checkbox-group"
+                          value="student"
+                        />
+                        Student
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Password Errors -->
                   <div class="form-group row">
                     <div class="col-sm-6">
                       <small id="passwordError" class="error-message"></small>
@@ -141,6 +189,7 @@
                       <small id="confPassError" class="error-message"></small>
                     </div>
                   </div>
+                  <!-- End Password Errors -->
 
                   <button
                     type="submit"
@@ -152,6 +201,8 @@
                   </button>
                   <hr />
                 </form>
+                <!-- End Form -->
+
                 {%if message%}
                 <div class="text-center pt-2 text-success">
                   <p class="small">{{message}}</p>
@@ -185,6 +236,22 @@
           passwordInput.type = "password";
         }
       }
+    </script>
+
+    <script>
+      // JavaScript to allow only one checkbox to be checked
+      const checkboxes = document.querySelectorAll(".checkbox-group");
+
+      checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", function () {
+          // Uncheck all other checkboxes in the group
+          checkboxes.forEach((otherCheckbox) => {
+            if (otherCheckbox !== checkbox) {
+              otherCheckbox.checked = false;
+            }
+          });
+        });
+      });
     </script>
 
     <!-- Bootstrap core JavaScript-->

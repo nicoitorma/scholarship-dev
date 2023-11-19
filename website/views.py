@@ -2,7 +2,7 @@ from flask import Blueprint, session, render_template, redirect, url_for, reques
 from firebase_admin_config import admin_firestore as db
 from pyrebase_config import bucket, user_auth
 from firebase_admin import firestore
-from .models import Applicant, Student, Beneficiaries, Receipts
+from .models import Applicant, Student, Beneficiaries, Receipts, Admins
 from datetime import datetime
 
 views = Blueprint('views', __name__, static_folder='static',
@@ -11,6 +11,7 @@ views = Blueprint('views', __name__, static_folder='static',
 ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf']
 STUDENT_ROLE = 'student'
 ADMIN_ROLE = 'admin'
+SUPER_ADMIN = 'super admin'
 
 
 def get_applicants_count():
@@ -21,6 +22,12 @@ def get_applicants_count():
     documents = db.collection('admin').document('applicants').get()
     doc_data = documents.to_dict()
     return len(doc_data)
+
+
+def get_admin_count():
+    admin = db.collection('users').where('role', '==', 'admin').get()
+    count = len(admin)
+    return count
 
 
 def is_allowed(filename):
@@ -94,8 +101,16 @@ def index():
                 'fName': user_details.get('fName', ''),
                 'lName': user_details.get('lName', ''),
                 'role': user_role,
+                'status': user_details.get('status')
             }
             return admin()
+        elif user_role == SUPER_ADMIN:
+            session['user_data'] = {
+                'fName': user_details.get('fName', ''),
+                'lName': user_details.get('lName', ''),
+                'role': user_role,
+            }
+            return super_admin()
 
     return redirect(url_for('auth.login'))
 
@@ -287,6 +302,47 @@ def admin():
     return render_template('admin/index.html', count_beneficiaries=count_beneficiaries(), appli_count=get_applicants_count(), data1=count_per_municipality())
 
 
+@views.route('/super-admin')
+def super_admin():
+    return render_template('admin/super_admin.html', count_beneficiaries=count_beneficiaries(), admins=get_admin_count(), data1=count_per_municipality())
+
+
+def get_admins():
+    query = db.collection('users').get()
+
+    users = []
+    for doc in query:
+        data = doc.to_dict()
+        role = data.get('role')
+
+        # Count documents for each address
+        if role == 'admin':
+            users.append(Admins(data.get('fName', ''), data.get('lName', ''), data.get('email', ''),
+                                data.get('role', ''), data.get('status', '')))
+    return users
+
+
+@views.route('/users', methods=['POST', 'GET'])
+def users():
+    if 'email' in session and session['user_data'].get('role') == SUPER_ADMIN:
+        if request.method == 'POST':
+            data = request.get_json()
+            admin_email = data['email']
+            action = data['action']
+            user_ref = db.collection('users').document(admin_email)
+
+            if action == 'accept':
+                user_ref.update(
+                    {'status': 'Confirmed'})
+            else:
+                user_ref.update(
+                    {'status': 'Removed'})
+            return render_template('admin.users.html', users=get_admins())
+
+        return render_template('admin/users.html', users=get_admins())
+    return redirect(url_for('auth.login'))
+
+
 @views.route('/applicants')
 def applicants():
     # This code block is checking if the user is logged in and has the role of an admin. If both
@@ -303,9 +359,6 @@ def applicants():
         for key, value in doc_data.items():
             applicants.append(Applicant(
                 key, value['email'], value['name'], value['school'], value['program'], value['year_level'], value['noa_link'], value['coe_link'], value['financial_link'], value['municipality']))
-
-    # This code block is handling the processing of an action (accept or reject) for an applicant in
-    # the admin panel.
         return render_template('admin/applicants.html', applicants=applicants)
     return redirect(url_for('auth.login'))
 

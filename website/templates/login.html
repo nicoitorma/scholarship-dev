@@ -32,8 +32,8 @@
     <style>
       .reveal-btn {
         position: absolute;
-        right: 70px;
-        top: 56%;
+        right: 20px;
+        top: 53%;
         transform: translateY(-50%);
         cursor: pointer;
         border: none;
@@ -64,7 +64,9 @@
                         Ako Bicol Partylist Scholarship System
                       </h1>
                     </div>
+                    <!-- Form -->
                     <form class="user" , action="/login" , method="post">
+                      <!-- Email -->
                       <div class="form-group">
                         <input
                           type="email"
@@ -75,18 +77,34 @@
                           placeholder="Enter Email Address..."
                         />
                       </div>
-                      <div class="form-group">
-                        <input
-                          type="password"
-                          name="password"
-                          class="form-control form-control-user"
-                          id="InputPassword"
-                          placeholder="Password"
-                        /><button
-                          type="button"
-                          class="fas fa-eye fa-2x text-gray-300 reveal-btn"
-                          onclick="togglePassword()"
-                        ></button>
+                      <!-- End Email -->
+
+                      <!-- Password -->
+                      <div class="form-group row">
+                        <div class="col-xl-12">
+                          <input
+                            type="password"
+                            name="password"
+                            class="form-control form-control-user"
+                            id="InputPassword"
+                            placeholder="Password"
+                          />
+                          <button
+                            type="button"
+                            class="fas fa-eye fa-2x text-gray-300 reveal-btn"
+                            onclick="togglePassword()"
+                          ></button>
+                        </div>
+                      </div>
+                      <!-- End Password -->
+
+                      <div class="form group">
+                        {%if error%}
+                        <div class="text-center text-danger">
+                          <p class="small">{{error}}</p>
+                        </div>
+
+                        {%endif%}
                       </div>
 
                       <button
@@ -98,11 +116,8 @@
                         Login
                       </button>
                     </form>
-                    {%if error%}
-                    <div class="text-center pt-2 text-danger">
-                      <p class="small">{{error}}</p>
-                    </div>
-                    {%endif%}
+                    <!-- End Form-->
+
                     <hr />
                     <div class="text-center">
                       <a id="forgot_pass" class="small">Forgot Password?</a>

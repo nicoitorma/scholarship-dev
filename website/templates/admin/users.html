@@ -1,0 +1,70 @@
+{%extends 'base.html'%} {%block title%} System Admins {%endblock%} {%block
+sidebar_script%}
+<script src="{{ url_for('static', filename='js/sidebar_item.js')}}"></script>
+{%endblock%} {%block content%}
+
+<div class="container-fluid">
+  <!-- Page Heading -->
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">System Admins</h1>
+  </div>
+  <!-- End Page Heading -->
+  <div class="row">
+    <!-- Content Column -->
+    <div class="col mb-4">
+      <div class="card shadow mb-4">
+        <div class="row p-4">
+          <div class="table-responsive">
+            <table
+              class="table table-bordered"
+              id="dataTable"
+              width="100%"
+              cellspacing="0"
+            >
+              <thead>
+                <tr>
+                  <th>First name</th>
+                  <th>Last name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {%for entry in users%}
+                <tr>
+                  <td>{{ entry.f_name}}</td>
+                  <td>{{entry.l_name }}</td>
+                  <td>{{entry.email}}</td>
+                  <td>{{entry.role}}</td>
+                  <td>{{entry.status}}</td>
+                  <td class="text-center">
+                    {%if entry.status=='Pending'%}
+                    <a
+                      class="text-success"
+                      onclick="showAdminConfirmation('{{entry.email}}', 'accept')"
+                    >
+                      Accept
+                    </a>
+                    {%endif%}
+                    <div></div>
+                    <a
+                      class="text-danger"
+                      onclick="showAdminConfirmation('{{entry.email}}', 'remove')"
+                    >
+                      Remove
+                    </a>
+                  </td>
+                </tr>
+                {%endfor%}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{%endblock%}

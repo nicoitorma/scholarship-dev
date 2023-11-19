@@ -46,3 +46,12 @@ class Receipts:
         self.date = date
         self.amount = amount
         self.released_by = release_by
+
+
+class Admins:
+    def __init__(self, f_name, l_name, email, role, status):
+        self.f_name = f_name
+        self.l_name = l_name
+        self.email = email
+        self.role = role
+        self.status = status

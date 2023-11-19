@@ -22,7 +22,8 @@ def login():
 
             return redirect(url_for('views.index'))
 
-        except Exception:
+        except Exception as e:
+            print(e)
             error = 'Incorrect email or password.'
         return render_template('login.html', error=error)
     else:
@@ -39,21 +40,31 @@ def register():
         l_name = request.form['lName']
         email = request.form['em']
         password = request.form['repeatPassword']
+        user_role = request.form.getlist('group1')
 
         try:
             # create student authentication
             user = user_auth.create_user_with_email_and_password(
                 email=email, password=password)
 
-            # create student details
-            user_data = {
-                'fName': f_name,
-                'lName': l_name,
-                'role': 'student',
-                'scholarship': 'None',
-                'status': 'None',
-                'email': email
-            }
+            if user_role[0] == 'admin':
+                user_data = {
+                    'fName': f_name,
+                    'lName': l_name,
+                    'role': user_role[0],
+                    'status': 'Pending',
+                    'email': email
+                }
+            else:
+                # create student details
+                user_data = {
+                    'fName': f_name,
+                    'lName': l_name,
+                    'role': user_role[0],
+                    'scholarship': 'None',
+                    'status': 'None',
+                    'email': email
+                }
 
             # Store user details in Firestore
             db.collection('users').document(

@@ -31,7 +31,8 @@
   <hr class="sidebar-divider" />
 
   <!-- Applicants Item for Admin -->
-  {% if session['user_data']['role'] == 'admin'%}
+  {% if session['user_data']['role'] == 'admin' and
+  session['user_data']['status'] =='Confirmed'%}
   <li class="nav-item">
     <a class="nav-link" href="/applicants" id="Applicants">
       <i class="fas fa-fw fa-graduation-cap"></i>
@@ -41,7 +42,8 @@
   {%endif%}
 
   <!-- Beneficiaries Item for Admin -->
-  {% if session['user_data']['role'] == 'admin'%}
+  {% if session['user_data']['role'] == 'admin' and
+  session['user_data']['status'] == 'Confirmed'%}
   <li class="nav-item">
     <a class="nav-link" href="/beneficiaries" id="payout">
       <i class="fas fa-fw fa-address-book"></i>
@@ -86,11 +88,22 @@
   {%endif%}
 
   <!-- Payout Item for Admin -->
-  {% if session['user_data']['role'] == 'admin'%}
+  {% if session['user_data']['role'] == 'admin' and
+  session['user_data']['status'] == 'Confirmed'%}
   <li class="nav-item">
     <a class="nav-link" href="/payout" id="payout">
       <i class="fas fa-fw fa-money-check"></i>
       <span>Payout</span></a
+    >
+  </li>
+  {%endif%}
+
+  <!-- Payout Item for Admin -->
+  {% if session['user_data']['role'] == 'super admin'%}
+  <li class="nav-item">
+    <a class="nav-link" href="/users" id="payout">
+      <i class="fas fa-fw fa-money-check"></i>
+      <span>System Admins</span></a
     >
   </li>
   {%endif%}
